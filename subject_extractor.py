@@ -39,7 +39,14 @@ COMPOSED_DIR = "composed_images"
 STATIC_DIR = os.path.dirname(os.path.abspath(__file__))
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 os.makedirs(COMPOSED_DIR, exist_ok=True)
-REMBG_SESSION = new_session("u2netp")
+REMBG_SESSION = None
+
+def get_rembg_session():
+    global REMBG_SESSION
+    if REMBG_SESSION is None:
+        logger.info("Initializing Rembg session (u2netp)...")
+        REMBG_SESSION = new_session("u2netp")
+    return REMBG_SESSION
 
 # Serve static HTML files
 @app.route('/')
@@ -98,7 +105,7 @@ def extract_subject():
         logger.info(f'Input image: {input_image.size}, {input_image.mode}')
         
         # Remove background using U²-Net
-        output_image = remove(input_image, session=REMBG_SESSION)
+        output_image = remove(input_image, session=get_rembg_session())
         logger.info('Background removed successfully')
         
         # Convert to base64
