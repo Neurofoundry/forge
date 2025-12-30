@@ -1633,7 +1633,13 @@ ${combined}`;
         if (!response.ok) throw new Error(`Extraction failed: ${response.status}`);
         const data = await response.json();
         extractedSubject = data.image;
-        cdpContext = await runCdp(extractedSubject);
+        try {
+          cdpContext = await runCdp(extractedSubject);
+        } catch (err) {
+          console.error(err);
+          cdpContext = '';
+          setFusionStatus('CDP failed. Extraction ok.');
+        }
       }
 
       async function mergeImages() {
@@ -1667,10 +1673,22 @@ ${combined}`;
         setProcessing(true);
         try {
           await extractSubject();
-          acpContext = await runAcp(backgroundImage);
+          try {
+            acpContext = await runAcp(backgroundImage);
+          } catch (err) {
+            console.error(err);
+            acpContext = '';
+            setFusionStatus('ACP failed. Continuing...');
+          }
           mergedImage = await mergeImages();
           displayImage(mergedImage);
-          sipContext = await runSip(mergedImage);
+          try {
+            sipContext = await runSip(mergedImage);
+          } catch (err) {
+            console.error(err);
+            sipContext = '';
+            setFusionStatus('SIP failed. Continuing...');
+          }
           setFusionStatus('Fusion ready.');
           setStatus('Fusion ready. Press Forge.', 'success');
         } catch (err) {
