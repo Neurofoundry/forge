@@ -1148,24 +1148,24 @@
               <p class="panel-description">Blend elements. Subject + Scene + Style = Origin.</p>
               
               <div class="fusion-grid" id="fusionGrid">
-                <label class="fusion-item" data-role="subject" id="fusionSubject">
+                <div class="fusion-item" data-role="subject" id="fusionSubject" role="button" tabindex="0">
                   <div class="fusion-label">Subject</div>
                   <div class="fusion-hint">Drop or click</div>
                   <input type="file" id="fusionSubjectInput" accept="image/*">
                   <span class="fusion-check"></span>
-                </label>
-                <label class="fusion-item" data-role="scene" id="fusionScene">
+                </div>
+                <div class="fusion-item" data-role="scene" id="fusionScene" role="button" tabindex="0">
                   <div class="fusion-label">Scene</div>
                   <div class="fusion-hint">Drop or click</div>
                   <input type="file" id="fusionSceneInput" accept="image/*">
                   <span class="fusion-check"></span>
-                </label>
-                <label class="fusion-item" data-role="style" id="fusionStyle">
+                </div>
+                <div class="fusion-item" data-role="style" id="fusionStyle" role="button" tabindex="0">
                   <div class="fusion-label">Style</div>
                   <div class="fusion-hint">Optional</div>
                   <input type="file" id="fusionStyleInput" accept="image/*">
                   <span class="fusion-check"></span>
-                </label>
+                </div>
               </div>
               <div class="fusion-status" id="fusionStatus">Waiting for subject + scene.</div>
               <button class="generate-btn" disabled>Generate Image</button>
@@ -1553,6 +1553,15 @@
 
       function bindFusionInput(item, input, role) {
         if (!item || !input) return;
+        item.addEventListener('click', () => {
+          input.click();
+        });
+        item.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            input.click();
+          }
+        });
         item.addEventListener('dragover', (e) => {
           e.preventDefault();
           item.style.borderColor = '#e0473c';
