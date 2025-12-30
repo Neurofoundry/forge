@@ -31,7 +31,7 @@ def add_cors_headers(response):
         response.headers["Access-Control-Allow-Origin"] = origin
         response.headers["Vary"] = "Origin"
     response.headers["Access-Control-Allow-Methods"] = "GET,POST,OPTIONS"
-    response.headers["Access-Control-Allow-Headers"] = "Content-Type, X-Requested-With"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, X-Requested-With, X-Auth-Key, Authorization"
     return response
 
 OUTPUT_DIR = "extracted_subjects"
@@ -727,6 +727,7 @@ def add_edge_blur(subject):
 
 
 if __name__ == '__main__':
+    port = int(os.environ.get("PORT", "5001"))
     print("="*60)
     print("🎨 Subject Extractor & Composer Service")
     print("="*60)
@@ -739,15 +740,5 @@ if __name__ == '__main__':
     print("   POST /compose       - Compose subject + scene + style")
     print("   GET  /health        - Check service status")
     print("="*60)
-    print("\n✨ Opening browser automatically...\n")
     
-    # Auto-open browser
-    import webbrowser
-    import threading
-    def open_browser():
-        import time
-        time.sleep(1.5)
-        webbrowser.open('http://localhost:5001')
-    threading.Thread(target=open_browser, daemon=True).start()
-    
-    app.run(host='0.0.0.0', port=5001, debug=False, threaded=True)
+    app.run(host='0.0.0.0', port=port, debug=False, threaded=True)
