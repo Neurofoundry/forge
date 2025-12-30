@@ -1535,7 +1535,6 @@
 
       function bindFusionInput(item, input, role) {
         if (!item || !input) return;
-        item.addEventListener('click', () => input.click());
         item.addEventListener('dragover', (e) => {
           e.preventDefault();
           item.style.borderColor = '#e0473c';
