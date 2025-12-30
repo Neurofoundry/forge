@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Subject Merge + Caption Test</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0a0a0a;
+      color: #fff;
+      font-family: system-ui, -apple-system, sans-serif;
+      padding: 40px;
+    }
+    h1 {
+      color: #ff7b6e;
+      margin-bottom: 10px;
+    }
+    .subtitle {
+      color: #999;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+    .workflow {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+    .step {
+      background: #1a1a1a;
+      border: 2px solid #e0473c;
+      border-radius: 12px;
+      padding: 15px;
+      text-align: center;
+      position: relative;
+    }
+    .step h3 {
+      color: #c9a877;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+    .preview {
+      border: 2px dashed rgba(224,71,60,0.3);
+      border-radius: 8px;
+      min-height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #666;
+      font-size: 11px;
+      overflow: hidden;
+    }
+    .preview img {
+      max-width: 100%;
+      max-height: 180px;
+      object-fit: contain;
+    }
+    .caption-container {
+      background: #0f0f0f;
+      border: 1px solid rgba(224,71,60,0.3);
+      border-radius: 6px;
+      padding: 8px;
+      margin-top: 8px;
+      font-size: 10px;
+      line-height: 1.3;
+      color: #aaa;
+      text-align: left;
+      max-height: 120px;
+      overflow-y: auto;
+    }
+    .caption-container strong {
+      color: #c9a877;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .upload-btn {
+      background: linear-gradient(135deg, #e0473c, #ff7b6e);
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      margin-top: 10px;
+      width: 100%;
+    }
+    .upload-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .process-btn {
+      background: linear-gradient(135deg, #4CAF50, #45a049);
+      border: none;
+      color: white;
+      padding: 16px 40px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      display: block;
+      margin: 0 auto 30px;
+    }
+    .process-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .status {
+      background: rgba(59,130,246,0.2);
+      color: #3b82f6;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      text-align: center;
+      display: none;
+    }
+    .status.active { display: block; }
+    .status.success { background: rgba(34,197,94,0.2); color: #22c55e; }
+    .status.error { background: rgba(239,68,68,0.2); color: #ef4444; }
+    .result {
+      background: #1a1a1a;
+      border: 2px solid #c9a877;
+      border-radius: 12px;
+      padding: 30px;
+      display: none;
+    }
+    .result.active { display: block; }
+    .result h2 { color: #c9a877; margin-bottom: 20px; }
+    .result img { max-width: 100%; border-radius: 8px; }
+    .caption-box {
+      background: #0f0f0f;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-style: italic;
+      color: #aaa;
+    }
+    input[type="file"] { display: none; }
+  </style>
+</head>
+<body>
+  <h1>🧪 Subject Merge + Caption Experiment</h1>
+  <p class="subtitle">
+    Step 1: Subject → Step 2: Extracted → Step 3: Background → Step 4: Atmosphere → Step 5: Merge → Step 6: SIP → Step 7: Caption → Step 8: Render
+  </p>
+
+  <div class="workflow">
+    <!-- Step 1: Upload Subject -->
+    <div class="step">
+      <h3>1. Subject Image</h3>
+      <div class="preview" id="subjectPreview">Upload</div>
+      <input type="file" id="subjectInput" accept="image/*">
+      <button class="upload-btn" onclick="document.getElementById('subjectInput').click()">
+        📤 Upload
+      </button>
+    </div>
+
+    <!-- Step 2: Extract Subject -->
+    <div class="step">
+      <h3>2. Extracted Subject (CDP) </h3>
+      <div class="preview" id="extractedPreview">Waiting...</div>
+      <div class="caption-container" id="cdpCaption" style="display: none;"></div>
+    </div>
+
+    <!-- Step 3: Upload Background -->
+    <div class="step">
+      <h3>3. Background Image</h3>
+      <div class="preview" id="backgroundPreview">Upload</div>
+      <input type="file" id="backgroundInput" accept="image/*">
+      <button class="upload-btn" onclick="document.getElementById('backgroundInput').click()">
+        📤 Upload
+      </button>
+    </div>
+
+    <!-- Step 4: Atmosphere (ACP) Analysis -->
+    <div class="step">
+      <h3>4. Atmosphere (ACP)</h3>
+      <div class="preview" id="stylePreview" style="flex-direction: column; padding: 10px; font-size: 11px; line-height: 1.4;">
+        Waiting...
+      </div>
+    </div>
+
+    <!-- Step 5: Merged -->
+    <div class="step">
+      <h3>5. Merged Image</h3>
+      <div class="preview" id="mergedPreview">Waiting...</div>
+    </div>
+
+    <!-- Step 6: SIP Caption (scene integration) -->
+    <div class="step">
+      <h3>6. SIP Caption</h3>
+      <div class="preview" id="analysisPreview" style="flex-direction: column; padding: 10px; font-size: 11px; line-height: 1.4;">
+        Waiting...
+      </div>
+    </div>
+
+    <!-- Step 7: Caption -->
+    <div class="step">
+      <h3>7. Caption Result</h3>
+      <div class="preview" id="captionPreview" style="flex-direction: column; padding: 10px; font-size: 11px; line-height: 1.4;">
+        Waiting...
+      </div>
+    </div>
+  </div>
+
+  <button class="process-btn" id="processBtn" disabled>
+    🚀 Process: Extract → Merge → Analyze → Caption → Render x3
+  </button>
+
+  <div class="status" id="status"></div>
+
+  <div class="result" id="result">
+    <h2>✨ Final Rendered Images (x3)</h2>
+    <div class="caption-box" id="finalCaption"></div>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 20px;">
+      <div>
+        <h3 style="color: #c9a877; font-size: 14px; margin-bottom: 10px;">Variation 1</h3>
+        <img id="finalImage1" alt="Result 1" style="width: 100%; border-radius: 8px;">
+      </div>
+      <div>
+        <h3 style="color: #c9a877; font-size: 14px; margin-bottom: 10px;">Variation 2</h3>
+        <img id="finalImage2" alt="Result 2" style="width: 100%; border-radius: 8px;">
+      </div>
+      <div>
+        <h3 style="color: #c9a877; font-size: 14px; margin-bottom: 10px;">Variation 3</h3>
+        <img id="finalImage3" alt="Result 3" style="width: 100%; border-radius: 8px;">
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const REMBG_API = 'https://nfcr-extractor.onrender.com/extract';
+    const CAPTION_API = 'https://nfcr-synthesize.onrender.com/features/4/caption';
+    const RENDER_API = 'https://nfcr-synthesize.onrender.com/features/4/render';
+    // Base URL for Cloudflare fusion endpoints. These endpoints handle
+    // independent caption extractions (CDP, ACP, SIP).
+    const FUSION_API = 'https://prmptrndr.csirico9.workers.dev/fusion';
+    // Use the dedicated synth worker with GPT-OSS-120B
+    const SYNTH_API = 'https://synth.csirico9.workers.dev';
+
+    // Instruction file URLs (set these to the online text files that contain
+    // specific instructions for each caption step)
+    const CDP_INSTRUCTION_URL = 'https://theneurofoundry.com/prompts/fusion/cdp.txt'; // e.g., ''
+    const ACP_INSTRUCTION_URL = ''; // e.g., 'https://theneurofoundry.com/prompts/fusion/acp.txt'
+    const SIP_INSTRUCTION_URL = ''; // e.g., 'https://theneurofoundry.com/prompts/fusion/sip.txt'
+    const SYNTH_INSTRUCTION_URL = ''; // e.g., 'https://theneurofoundry.com/prompts/fusion/synth.txt'
+
+    // Helper to fetch remote instruction text; returns empty string on failure
+    async function fetchInstruction(url) {
+      if (!url) return '';
+      try {
+        const r = await fetch(url);
+        if (!r.ok) return '';
+        return await r.text();
+      } catch (e) {
+        console.warn('Instruction fetch failed', e);
+        return '';
+      }
+    }
+
+    let subjectImage = null;
+    let backgroundImage = null;
+    let extractedSubject = null;
+    // Independent caption contexts
+    let cdpContext = null;
+    let acpContext = null;
+    let sipContext = null;
+    let finalCaption = null;
+    let mergedImage = null;
+    let fullAnalysis = null;
+    let isProcessing = false;
+
+    // -----------------------------------------------------------------
+    // Helper functions to communicate with the Cloudflare fusion worker. Each
+    // function sends an image (or contexts) to the corresponding endpoint
+    // and returns the relevant description. These calls are independent; no
+    // context is shared between them until synthesis.
+
+    async function runCdp(imageData) {
+      // Send the extracted subject image to the CDP worker endpoint
+      const response = await fetch(`${FUSION_API}/cdp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-key': 'Tr1bXimgEnV1-sdbAI25'
+        },
+        body: JSON.stringify({ image_base64: imageData }),
+      });
+      if (!response.ok) throw new Error(`CDP failed: ${response.status}`);
+      const data = await response.json();
+      return data.cdp || data.caption || data.output || '';
+    }
+
+    async function runAcp(imageData) {
+      // Send the background image to the ACP worker endpoint
+      const response = await fetch(`${FUSION_API}/acp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-key': 'Tr1bXimgEnV1-sdbAI25'
+        },
+        body: JSON.stringify({ image_base64: imageData }),
+      });
+      if (!response.ok) throw new Error(`ACP failed: ${response.status}`);
+      const data = await response.json();
+      return data.acp || data.caption || data.output || '';
+    }
+
+    // SIP Instruction - embedded directly
+    const SIP_INSTRUCTION = `TASK: Identify the visual style of this image.
+
+IGNORE the subject/content completely. ONLY analyze the visual style, color palette, and rendering technique.
+
+You MUST output EXACTLY color palette, and Style:
+
+Color palette: [describe the colors briefly]
+Style: [pick ONE style from the list below]
+
+STYLE LIST - You MUST choose ONE:
+Ghibli style, Disney animation style, Pixar 3D render, anime style, manga illustration, comic book art, graphic novel style, oil painting, watercolor painting, acrylic painting, impressionist painting, expressionist art, surrealist art, abstract art, minimalist design, Art Deco style, Art Nouveau style, retro 1950s illustration, vintage 1980s aesthetic, cyberpunk art, synthwave aesthetic, vaporwave aesthetic, pixel art, low poly 3D, isometric game art, concept art, matte painting, digital painting, photorealistic render, hyperrealistic art, cinematic photography, film noir style, baroque painting, renaissance painting, ukiyo-e Japanese print, art by Moebius, art by Hayao Miyazaki, art by Makoto Shinkai, art by Greg Rutkowski, art by Artgerm, art by Ross Tran, art by Studio Ghibli, art by James Gurney, art by Simon Stålenhag, art by Alphonse Mucha, art by Yoshitaka Amano, art by Akira Toriyama, Unreal Engine 5 render, Octane render, Blender 3D render, clay render, paper cutout art, stained glass window, mosaic art, charcoal sketch, pencil drawing, ink illustration, linocut print, screen print, risograph print, blueprint technical drawing, architectural visualization, fashion illustration, children's book illustration, editorial illustration, propaganda poster style, travel poster vintage, movie poster aesthetic
+
+CRITICAL: Your response must be ONLY these two lines. NO explanations. NO additional text.
+
+Example output:
+Color palette: warm earth tones with orange and brown
+Style: oil painting`;
+
+    async function runSip(imageData) {
+      // Send the merged image to the SIP worker with embedded instruction
+      const response = await fetch(`${FUSION_API}/sip`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-key': 'Tr1bXimgEnV1-sdbAI25'
+        },
+        body: JSON.stringify({ 
+          image_base64: imageData,
+          instruction: SIP_INSTRUCTION
+        }),
+      });
+      if (!response.ok) throw new Error(`SIP failed: ${response.status}`);
+      const data = await response.json();
+      return data.sip || data.caption || data.output || '';
+    }
+
+    async function runSynth(cdp, acp, sip) {
+      // COMPRESSION APPROACH: Send all 3 captions to LLM and ask it to compress
+      
+      if (!cdp || !acp || !sip) {
+        throw new Error('Synth input missing one or more captions');
+      }
+
+      console.log('=== SYNTH COMPRESSION ===');
+      console.log('CDP length:', cdp.length);
+      console.log('ACP length:', acp.length);
+      console.log('SIP length:', sip.length);
+
+      // Combine all three, then ask model to compress to 75 tokens
+      const fullText = `${cdp} ${acp} ${sip}`;
+      const compressionPrompt = `Compress the following into a single vivid image caption. Maximum 75 tokens. Preserve key visual details. Output only the caption, no labels or commentary:\n\n${fullText}`;
+
+      console.log('Compression prompt length:', compressionPrompt.length);
+
+      const response = await fetch(SYNTH_API, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-key': 'Tr1bXimgEnV1-sdbAI25'
+        },
+        body: JSON.stringify({
+          prompt: compressionPrompt
+        })
+      });
+
+      const bodyText = await response.text();
+
+      if (!response.ok) {
+        console.error('Synth failed:', response.status, bodyText);
+        throw new Error(`Synth failed ${response.status}`);
+      }
+
+      let data;
+      try {
+        data = JSON.parse(bodyText);
+      } catch {
+        throw new Error(`Synth returned non-JSON: ${bodyText}`);
+      }
+
+      const result =
+        data.synth ||
+        data.output ||
+        data.result ||
+        data.caption ||
+        data.text ||
+        '';
+
+      if (!result || !result.trim()) {
+        throw new Error('Model returned empty output');
+      }
+
+      console.log('Compressed result:', result);
+      return result.trim();
+    }
+
+    // Reset all analysis states
+    function resetAnalysis() {
+      // Reset stored contexts and analysis results
+      cdpContext = null;
+      acpContext = null;
+      sipContext = null;
+      finalCaption = null;
+      fullAnalysis = null;
+
+      document.getElementById('stylePreview').innerHTML = 'Waiting...';
+      document.getElementById('mergedPreview').innerHTML = 'Waiting...';
+      document.getElementById('analysisPreview').innerHTML = 'Waiting...';
+      document.getElementById('captionPreview').innerHTML = 'Waiting...';
+      document.getElementById('result').classList.remove('active');
+      document.getElementById('processBtn').disabled = true;
+    }
+
+    // Reset analysis state when only the background changes. This preserves
+    // the extracted subject and its CDP description, but clears any
+    // atmosphere, SIP, merge and final results so that they can be
+    // recomputed for the new background. This is used when the user
+    // uploads a new background after the subject has been extracted.
+    function resetForBackground() {
+      acpContext = null;
+      sipContext = null;
+      finalCaption = null;
+      mergedImage = null;
+      fullAnalysis = null;
+      // Clear previews for merge, analysis (SIP) and caption. Keep
+      // extracted subject and CDP preview intact.
+      document.getElementById('mergedPreview').innerHTML = 'Waiting...';
+      document.getElementById('analysisPreview').innerHTML = 'Waiting...';
+      document.getElementById('captionPreview').innerHTML = 'Waiting...';
+      document.getElementById('result').classList.remove('active');
+      // Disable process button until the new fusion process runs again
+      document.getElementById('processBtn').disabled = true;
+    }
+
+    // Handle subject upload
+    document.getElementById('subjectInput').onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      resetAnalysis(); // Clear old data
+
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        subjectImage = ev.target.result;
+        document.getElementById('subjectPreview').innerHTML = `<img src="${subjectImage}">`;
+        
+        // Clear extracted subject
+        extractedSubject = null;
+        document.getElementById('extractedPreview').innerHTML = 'Processing...';
+        
+        extractSubject();
+      };
+      reader.readAsDataURL(file);
+    };
+
+    // Handle background upload
+    document.getElementById('backgroundInput').onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      // Do not fully reset analysis when changing the background. We want to
+      // preserve the extracted subject and its CDP description. Instead,
+      // clear only the background-dependent contexts and merge/SIP/final
+      // results. See resetForBackground() for details.
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        backgroundImage = ev.target.result;
+        document.getElementById('backgroundPreview').innerHTML = `<img src="${backgroundImage}">`;
+
+        // Reset only the dependent states so a new merge can occur without
+        // losing the subject or its CDP caption.
+        resetForBackground();
+
+        // Clear atmosphere preview and trigger ACP generation
+        document.getElementById('stylePreview').innerHTML = 'Processing...';
+        
+        analyzeBackgroundStyle();
+      };
+      reader.readAsDataURL(file);
+    };
+
+    // Generate ACP (atmosphere description) from the background image. The result
+    // is displayed in step 4 and stored for the final synthesis. No other
+    // context is used.
+    async function analyzeBackgroundStyle() {
+      showStatus('Generating atmosphere description...', 'active');
+
+      try {
+        // Use the Cloudflare fusion worker to create the ACP description
+        acpContext = await runAcp(backgroundImage);
+        document.getElementById('stylePreview').innerHTML = `<strong>Atmosphere:</strong><br>${acpContext}`;
+        showStatus('✓ Atmosphere described!', 'success');
+        
+        checkReady();
+      } catch (error) {
+        console.error(error);
+        showStatus(`❌ ACP generation failed: ${error.message}`, 'error');
+      }
+    }
+
+    // Extract subject using rembg
+    async function extractSubject() {
+      showStatus('Extracting subject with rembg...', 'active');
+
+      try {
+        const response = await fetch(REMBG_API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image: subjectImage })
+        });
+
+        if (!response.ok) throw new Error(`Extraction failed: ${response.status}`);
+
+        const result = await response.json();
+        extractedSubject = result.image;
+
+        // Generate the CDP caption immediately after extraction. The result
+        // will be shown under the extracted subject so that the user can see
+        // the description of the isolated subject. If the caption fails
+        // to generate, display an error message instead.
+        try {
+          cdpContext = await runCdp(extractedSubject);
+          document.getElementById('extractedPreview').innerHTML = `<img src="${extractedSubject}">`;
+          const captionEl = document.getElementById('cdpCaption');
+          captionEl.innerHTML = `<strong>CDP:</strong>${cdpContext}`;
+          captionEl.style.display = 'block';
+          showStatus('✓ Subject extracted & CDP generated!', 'success');
+        } catch (err) {
+          console.error(err);
+          document.getElementById('extractedPreview').innerHTML = `<img src="${extractedSubject}">`;
+          const captionEl = document.getElementById('cdpCaption');
+          captionEl.innerHTML = `<strong style="color: #ef4444;">CDP error:</strong> ${err.message}`;
+          captionEl.style.display = 'block';
+          showStatus(`❌ CDP generation failed: ${err.message}`, 'error');
+        }
+
+        // After extraction and CDP generation, update readiness for merging.
+        checkReady();
+      } catch (error) {
+        console.error(error);
+        showStatus(`❌ Extraction failed: ${error.message}`, 'error');
+      }
+    }
+
+    // Check if ready to merge
+    function checkReady() {
+      // Determine if merging can begin: subject extracted, background uploaded,
+      // and ACP/CDP contexts generated. When subject and background are both
+      // present and we aren't currently processing, trigger the merge.
+      // CDP and ACP contexts are not required to begin merging; they are
+      // used later for the final caption. This prevents the UI from stalling
+      // if one of the captions fails but merging can still proceed.
+      const readyToMerge =
+        extractedSubject &&
+        backgroundImage &&
+        !isProcessing;
+      if (readyToMerge && !mergedImage) {
+        mergeImages();
+      }
+      // Enable the process button once all independent contexts (CDP, ACP,
+      // SIP) and the merged image are ready. We no longer wait for the
+      // synthesis (final caption) to enable the button, since the final
+      // caption is generated only when the user clicks the process button.
+      const canProcess = mergedImage && cdpContext && acpContext && sipContext;
+      document.getElementById('processBtn').disabled = !canProcess || isProcessing;
+    }
+
+    // Merge extracted subject onto background
+    async function mergeImages() {
+      showStatus('Merging subject onto background...', 'active');
+
+      try {
+        // Reset merged data
+        mergedImage = null;
+        fullAnalysis = null;
+        document.getElementById('mergedPreview').innerHTML = 'Processing...';
+        document.getElementById('analysisPreview').innerHTML = 'Waiting...';
+
+        const canvas = document.createElement('canvas');
+        canvas.width = 1024;
+        canvas.height = 576;
+        const ctx = canvas.getContext('2d');
+
+        // Load images
+        const loadImg = (src) => new Promise((resolve) => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.src = src;
+        });
+
+        const [bgImg, subImg] = await Promise.all([
+          loadImg(backgroundImage),
+          loadImg(extractedSubject)
+        ]);
+
+        // Draw background
+        ctx.drawImage(bgImg, 0, 0, 1024, 576);
+
+        // Draw subject on top (centered)
+        const scale = Math.min(1024 / subImg.width, 576 / subImg.height) * 0.8;
+        const w = subImg.width * scale;
+        const h = subImg.height * scale;
+        const x = (1024 - w) / 2;
+        const y = (576 - h) / 2;
+        ctx.drawImage(subImg, x, y, w, h);
+
+        mergedImage = canvas.toDataURL('image/png');
+
+        document.getElementById('mergedPreview').innerHTML = `<img src="${mergedImage}">`;
+        showStatus('✓ Images merged!', 'success');
+
+        // Auto-analyze after merge
+        await analyzeFullComposition();
+
+      } catch (error) {
+        console.error(error);
+        showStatus(`❌ Merge failed: ${error.message}`, 'error');
+      }
+    }
+
+    // Analyze merged image by generating the SIP description. This replaces
+    // the previous color/mood analysis. It stores the SIP result and shows
+    // it in step 6. The final synthesis is only triggered by the process
+    // button. This function runs automatically after merge.
+    async function analyzeFullComposition() {
+      showStatus('Generating SIP description...', 'active');
+      try {
+        // Reset preview
+        document.getElementById('analysisPreview').innerHTML = 'Processing...';
+        // Generate SIP caption from the merged image
+        sipContext = await runSip(mergedImage);
+        document.getElementById('analysisPreview').innerHTML = `<strong>SIP:</strong><br>${sipContext}`;
+        showStatus('✓ SIP generated!', 'success');
+        // Clear any previous final caption since we will synthesise on button click
+        finalCaption = null;
+        document.getElementById('captionPreview').innerHTML = 'Waiting...';
+        // Enable process button if ready
+        checkReady();
+      } catch (error) {
+        console.error(error);
+        showStatus(`❌ SIP generation failed: ${error.message}`, 'error');
+      }
+    }
+
+    // Process: Synth → Render x3.  This handler synthesises the final caption
+    // from CDP, ACP and SIP when clicked, then renders three images.  It
+    // requires that mergedImage, cdpContext, acpContext and sipContext are
+    // already available.
+    document.getElementById('processBtn').onclick = async () => {
+      // Ensure prerequisites are met
+      if (!mergedImage || !cdpContext || !acpContext || !sipContext || isProcessing) {
+        showStatus('Please wait for subject, background, and all captions before rendering.', 'error');
+        return;
+      }
+
+      isProcessing = true;
+      document.getElementById('processBtn').disabled = true;
+      document.getElementById('result').classList.remove('active');
+      document.getElementById('captionPreview').innerHTML = 'Processing...';
+
+      try {
+        // Step 1: Synthesise the final caption from CDP, ACP and SIP using the worker.
+        finalCaption = await runSynth(cdpContext, acpContext, sipContext);
+        
+        if (!finalCaption || finalCaption.trim() === '') {
+          showStatus('❌ Synth caption is empty.', 'error');
+          document.getElementById('captionPreview').innerHTML = 'Synth failed';
+          isProcessing = false;
+          checkReady();
+          return;
+        }
+        
+        document.getElementById('captionPreview').innerHTML = `"${finalCaption}"`;
+        showStatus('✓ Final caption generated!', 'success');
+
+        // Small pause before rendering
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        const promptForRender = finalCaption;
+
+        // Step 2: Render 3 variations using the final caption
+        for (let i = 1; i <= 3; i++) {
+          showStatus(`Rendering variation ${i}/3...`, 'active');
+          const response = await fetch(RENDER_API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              method: 'prompt',
+              prompt: promptForRender,
+              model: '@cf/stabilityai/stable-diffusion-xl-base-1.0',
+              width: 1024,
+              height: 576,
+              guidance_scale: 7.5,
+              num_inference_steps: 25
+            })
+          });
+          if (!response.ok) throw new Error(`Render ${i} failed: ${response.status}`);
+          const data = await response.json();
+          if (data.ok && data.image_base64) {
+            document.getElementById(`finalImage${i}`).src = `data:image/png;base64,${data.image_base64}`;
+          }
+        }
+
+        // Display the final results and caption in the result panel.  The
+        // metadata includes the independent captions as context.
+        const metadataHtml = `
+          <strong>CDP:</strong> ${cdpContext}<br>
+          <strong>ACP:</strong> ${acpContext}<br>
+          <strong>SIP:</strong> ${sipContext}<br><br>
+          <strong>Final Prompt:</strong> "${promptForRender}"
+        `;
+        document.getElementById('finalCaption').innerHTML = metadataHtml;
+        document.getElementById('result').classList.add('active');
+        showStatus('All variations rendered successfully!', 'success');
+
+      } catch (error) {
+        console.error('Process failed', error, { lastSynthDebug });
+        const debug = lastSynthDebug ? ` | synth payload: ${lastSynthDebug}` : '';
+        showStatus(`Process failed: ${error.message}${debug}`, 'error');
+      } finally {
+        isProcessing = false;
+        checkReady(); // Re-enable button when appropriate
+      }
+    };
+
+    function showStatus(message, className) {
+      const status = document.getElementById('status');
+      status.textContent = message;
+      status.className = `status ${className}`;
+    }
+
+    // Check services on load
+    window.onload = async () => {
+      try {
+        await fetch('https://nfcr-extractor.onrender.com/health');
+        await fetch('https://nfcr-synthesize.onrender.com/features/4/images');
+        console.log('✓ Services detected');
+      } catch (error) {
+        alert('⚠️ Services not running!\n\nNeed:\n- Rembg service (port 5001)\n- API server (port 8080)');
+      }
+    };
+  </script>
+</body>
+</html>
+
+

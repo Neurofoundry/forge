@@ -1,0 +1,1832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Forge - Neural Synthesis Engine | Neurofoundry</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body { 
+      background: transparent; /* moved solid background to .page-background so furnace can sit above it */
+      color: #e6e9ee; 
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      overflow: hidden;
+      line-height: 1.6;
+    }
+    
+    /* Header Styles */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 2000;
+      background: rgba(11, 12, 14, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 2px solid #e0473c;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      height: 64px;
+    }
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 100%;
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 0 18px;
+      width: 100%;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      font-size: 16px;
+      letter-spacing: 0.5px;
+      text-decoration: none;
+      color: #e6e9ee;
+    }
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #ff7b6e 0%, #e0473c 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 18px;
+      color: white;
+      box-shadow: 0 4px 12px rgba(224, 71, 60, 0.3);
+    }
+    .links {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .navlink {
+      color: #ccc;
+      font-size: 14px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .navlink:hover { color: #e0473c; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 18px;
+      border-radius: 8px;
+      font: 600 13px/1 Inter, sans-serif;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      border: 2px solid transparent;
+    }
+    .btn.primary {
+      background: linear-gradient(180deg, #ff7b6e 0%, #e9584d 48%, #d23d33 100%);
+      border-color: #a2362f;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(224, 71, 60, 0.3);
+    }
+    .btn.primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(224, 71, 60, 0.4);
+    }
+    
+    /* Main Container */
+    .forge-container {
+      width: 100%;
+      height: calc(100vh - 64px);
+      margin-top: 64px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    /* Background with furnace images layered */
+    /* Furnace background split into front (furnace.png) and back (furnacebg.png)
+       so the media viewer can layer between them */
+    .furnace-front {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 700; /* furnace frame visible in front of background */
+      background-image: url('./frame/furnace.png');
+      background-size: 60% auto;
+      background-position: center center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      display: none; /* Hidden temporarily */
+    }
+    .furnace-back {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0; /* place furnace background at the very bottom */
+      background-image: url('./frame/furnacebg.png');
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      animation: kenburns-loop 15s ease-in-out infinite;
+    }
+
+    /* Page solid background moved here so furnace images can sit above it */
+    .page-background {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: #0a0a0a;
+    }
+    
+    /* Overlay for darker furnace area */
+    .furnace-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 3;
+      background: 
+        radial-gradient(circle at 50% 40%, rgba(255, 100, 50, 0.1) 0%, rgba(0, 0, 0, 0.3) 100%),
+        linear-gradient(180deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.5) 100%);
+      pointer-events: none;
+    }
+    
+    /* Ember particles */
+    .ember-container {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      z-index: 800; /* sequence position 4 (effects) */
+      pointer-events: none;
+    }
+    
+    .ember {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: #ff7b6e;
+      border-radius: 50%;
+      animation: rise 4s infinite;
+      opacity: 0;
+      box-shadow: 0 0 6px #ff7b6e;
+    }
+    
+    @keyframes rise {
+      0% { 
+        opacity: 0;
+        transform: translateY(0) translateX(0);
+      }
+      10% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 0.5;
+      }
+      100% { 
+        opacity: 0;
+        transform: translateY(-300px) translateX(var(--drift, 0));
+      }
+    }
+    
+    .ember:nth-child(1) { left: 20%; top: 50%; animation-delay: 0s; animation-duration: 1.25s; --drift: -37px; }
+    .ember:nth-child(2) { left: 30%; top: 55%; animation-delay: 0.2s; animation-duration: 1.375s; --drift: 25px; }
+    .ember:nth-child(3) { left: 40%; top: 50%; animation-delay: 0.4s; animation-duration: 1.5s; --drift: -18px; }
+    .ember:nth-child(4) { left: 50%; top: 60%; animation-delay: 0.6s; animation-duration: 1.3s; --drift: 31px; }
+    .ember:nth-child(5) { left: 60%; top: 50%; animation-delay: 0.8s; animation-duration: 1.45s; --drift: -25px; }
+    .ember:nth-child(6) { left: 70%; top: 55%; animation-delay: 1s; animation-duration: 1.375s; --drift: 18px; }
+    .ember:nth-child(7) { left: 25%; top: 60%; animation-delay: 1.2s; animation-duration: 1.325s; --drift: -31px; }
+    .ember:nth-child(8) { left: 75%; top: 55%; animation-delay: 1.4s; animation-duration: 1.425s; --drift: 12px; }
+    
+    /* Main workspace - overlays panels on furnace */
+    .workspace {
+      position: relative;
+      z-index: 1100; /* UI controls should be top (sequence position 1) */
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+    
+    /* Panels overlay container */
+    .panels-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1100; /* UI controls on top */
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      pointer-events: none;
+    }
+    
+    /* Top row - title and controls */
+    .furnace-header {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      margin-bottom: 40px;
+      pointer-events: all;
+    }
+    
+    .header-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #c9a877;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      padding: 6px 12px;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 4px;
+      backdrop-filter: blur(10px);
+    }
+    
+    /* Side panels row */
+    .panels-row {
+      position: absolute;
+      top: 100px;
+      left: 0;
+      right: 0;
+      width: 100%;
+      height: calc(100% - 130px);
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      pointer-events: none;
+    }
+    
+    .panel {
+      /* Make panels solid and non-blended so they stand out above the furnace artwork */
+      background: #0b0b0b; /* fully opaque */
+      border: 1px solid rgba(224, 71, 60, 0.9);
+      border-radius: 10px;
+      padding: 16px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(224, 71, 60, 0.15);
+      /* remove backdrop blur so panels look solid */
+      backdrop-filter: none;
+      pointer-events: all;
+      max-height: 65%;
+      overflow-y: auto;
+      width: 220px;
+      flex-shrink: 0;
+    }
+    
+    .panel::-webkit-scrollbar {
+      width: 4px;
+    }
+    .panel::-webkit-scrollbar-track {
+      background: rgba(224, 71, 60, 0.1);
+      border-radius: 2px;
+    }
+    .panel::-webkit-scrollbar-thumb {
+      background: rgba(224, 71, 60, 0.4);
+      border-radius: 2px;
+    }
+    .panel::-webkit-scrollbar-thumb:hover {
+      background: rgba(224, 71, 60, 0.6);
+    }
+    
+    .panel-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(224, 71, 60, 0.2);
+    }
+    
+    .step-number {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, #e0473c, #ff7b6e);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 13px;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(224, 71, 60, 0.4);
+    }
+    
+    .panel-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #e6e9ee;
+    }
+    
+    .panel-description {
+      font-size: 10px;
+      color: #9aa3ad;
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+    
+    /* Upload Zone */
+    .upload-zone {
+      border: 2px dashed rgba(224, 71, 60, 0.4);
+      border-radius: 6px;
+      padding: 25px 12px;
+      text-align: center;
+      background: rgba(224, 71, 60, 0.05);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .upload-zone:hover {
+      border-color: #e0473c;
+      background: rgba(224, 71, 60, 0.1);
+    }
+    
+    .upload-icon {
+      width: 36px;
+      height: 36px;
+      margin: 0 auto 6px;
+      background: linear-gradient(135deg, rgba(224, 71, 60, 0.2), rgba(224, 71, 60, 0.1));
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+    
+    /* Fusion Grid */
+    .fusion-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    
+    .fusion-item {
+      background: rgba(224, 71, 60, 0.05);
+      border: 1px dashed rgba(224, 71, 60, 0.3);
+      border-radius: 6px;
+      aspect-ratio: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .fusion-item:hover {
+      background: rgba(224, 71, 60, 0.15);
+      border-color: #e0473c;
+    }
+    
+    .fusion-icon {
+      font-size: 16px;
+      margin-bottom: 3px;
+      opacity: 0.8;
+    }
+    
+    .fusion-label {
+      font-size: 8px;
+      font-weight: 600;
+      color: #c9d0d8;
+      text-transform: uppercase;
+      letter-spacing: 0.2px;
+    }
+    .fusion-hint {
+      font-size: 7px;
+      color: #7b8088;
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.2px;
+    }
+    .fusion-item input {
+      display: none;
+    }
+    .fusion-item.has-image {
+      border-color: #e0473c;
+      background-size: cover;
+      background-position: center;
+    }
+    .fusion-check {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: rgba(46, 213, 115, 0.9);
+      box-shadow: 0 0 8px rgba(46, 213, 115, 0.5);
+      opacity: 0;
+      transform: scale(0.8);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+    .fusion-check::after {
+      content: '';
+      position: absolute;
+      left: 4px;
+      top: 6px;
+      width: 6px;
+      height: 3px;
+      border-left: 2px solid #0b0b0b;
+      border-bottom: 2px solid #0b0b0b;
+      transform: rotate(-45deg);
+    }
+    .fusion-item.has-image .fusion-check {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .fusion-item.has-image .fusion-label,
+    .fusion-item.has-image .fusion-hint {
+      background: rgba(10, 10, 10, 0.7);
+      padding: 2px 4px;
+      border-radius: 3px;
+    }
+    .fusion-grid.disabled {
+      opacity: 0.35;
+      pointer-events: none;
+    }
+    .fusion-status {
+      margin-top: 8px;
+      font-size: 9px;
+      color: #9aa3ad;
+      min-height: 12px;
+    }
+    
+    .furnace-toggle-btn {
+      margin-top: 8px;
+      padding: 4px 8px;
+      font-size: 9px;
+      background: rgba(224, 71, 60, 0.1);
+      border: 1px solid rgba(224, 71, 60, 0.3);
+      border-radius: 3px;
+      color: rgba(224, 71, 60, 0.6);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .furnace-toggle-btn:hover {
+      background: rgba(224, 71, 60, 0.2);
+      color: rgba(224, 71, 60, 0.8);
+    }
+    
+    /* Buttons */
+    .generate-btn, .ai-generate-btn, .render-btn {
+      width: 100%;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    
+    .generate-btn {
+      padding: 9px;
+      background: linear-gradient(135deg, rgba(224, 71, 60, 0.8), rgba(224, 71, 60, 0.6));
+      margin-top: 10px;
+      box-shadow: 0 4px 12px rgba(224, 71, 60, 0.3);
+    }
+    .generate-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+    
+    .generate-btn:hover {
+      background: linear-gradient(135deg, #e0473c, #ff7b6e);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(224, 71, 60, 0.5);
+    }
+    
+    /* Input fields */
+    .input-group {
+      margin-bottom: 10px;
+    }
+    
+    .input-label {
+      font-size: 8px;
+      font-weight: 600;
+      color: #c9d0d8;
+      margin-bottom: 3px;
+      display: block;
+      text-transform: uppercase;
+      letter-spacing: 0.2px;
+    }
+    
+    .input-field, .input-select {
+      width: 100%;
+      padding: 6px 8px;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(224, 71, 60, 0.3);
+      border-radius: 4px;
+      color: #e6e9ee;
+      font-size: 10px;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+    
+    .input-field:focus, .input-select:focus {
+      outline: none;
+      border-color: #e0473c;
+      background: rgba(0, 0, 0, 0.7);
+      box-shadow: 0 0 0 3px rgba(224, 71, 60, 0.1);
+    }
+    
+    .input-field {
+      resize: vertical;
+      min-height: 35px;
+    }
+    
+    .ai-generate-btn {
+      padding: 9px;
+      background: linear-gradient(135deg, rgba(224, 71, 60, 0.8), rgba(224, 71, 60, 0.6));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      margin-top: 10px;
+      box-shadow: 0 4px 12px rgba(224, 71, 60, 0.3);
+    }
+    
+    .ai-generate-btn:hover {
+      background: linear-gradient(135deg, #e0473c, #ff7b6e);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(224, 71, 60, 0.5);
+    }
+    
+    .render-btn {
+      padding: 11px;
+      background: linear-gradient(135deg, #e0473c 0%, #ff7b6e 100%);
+      margin-top: 12px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.6px;
+      box-shadow: 0 6px 20px rgba(224, 71, 60, 0.5);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .render-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: left 0.5s;
+    }
+    
+    .render-btn:hover::before {
+      left: 100%;
+    }
+    
+    .render-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(224, 71, 60, 0.6);
+    }
+    
+    /* Left panels container */
+    .left-panels {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      flex-shrink: 0;
+    }
+    
+    /* Media Viewer - sits in furnace opening */
+    .media-viewer {
+      position: absolute;
+      top: 52%;
+      left: 50%;
+      transform: translate(-50%, calc(-50% - 60px));
+      width: 47.5%;
+      aspect-ratio: 16 / 9;
+      background: #000000;
+      border: 1px solid rgba(224, 71, 60, 0.2);
+      border-radius: 2px;
+      z-index: 500; /* behind furnace.png frame so video appears inside furnace */
+      overflow: hidden;
+      box-shadow: 
+        inset 0 0 30px rgba(0, 0, 0, 0.9),
+        0 0 40px rgba(0, 0, 0, 0.6);
+    }
+    
+    .media-container {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000000;
+      position: relative;
+    }
+    
+    .media-content {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .media-content video,
+    .media-content img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+    
+    .media-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      color: #666666;
+      gap: 12px;
+    }
+    
+    .placeholder-icon {
+      font-size: 48px;
+      opacity: 0.4;
+    }
+    
+    .placeholder-text {
+      font-size: 12px;
+      color: #555555;
+      text-align: center;
+    }
+    .media-viewer.processing .media-placeholder {
+      opacity: 0.3;
+    }
+    .holo-screen-container {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .media-viewer.processing .holo-screen-container {
+      opacity: 1;
+    }
+    .holo-screen {
+      position: relative;
+      width: 60px;
+      height: 80px;
+      background: linear-gradient(135deg,
+        rgba(255, 200, 0, 0.1),
+        rgba(255, 165, 0, 0.2),
+        rgba(255, 140, 0, 0.1)
+      );
+      border: 2px solid rgba(255, 180, 0, 0.6);
+      border-radius: 4px;
+      box-shadow:
+        0 0 20px rgba(255, 165, 0, 0.4),
+        0 0 40px rgba(255, 140, 0, 0.3),
+        inset 0 0 20px rgba(255, 200, 0, 0.1);
+      animation: holo-expand 2s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
+      overflow: hidden;
+    }
+    .holo-screen::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg,
+        transparent,
+        rgba(255, 180, 0, 0.3),
+        transparent
+      );
+      animation: holo-scan 3s linear infinite;
+    }
+    .holo-screen::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(255, 180, 0, 0.1) 0px,
+        transparent 2px,
+        transparent 4px
+      );
+      animation: holo-lines 0.1s linear infinite;
+    }
+    @keyframes holo-expand {
+      0% {
+        width: 60px;
+        height: 80px;
+        opacity: 0;
+        border-color: rgba(255, 180, 0, 0);
+        box-shadow: 0 0 0 rgba(255, 165, 0, 0);
+      }
+      15% {
+        opacity: 1;
+        border-color: rgba(255, 180, 0, 0.8);
+        box-shadow:
+          0 0 30px rgba(255, 165, 0, 0.6),
+          0 0 60px rgba(255, 140, 0, 0.4),
+          inset 0 0 30px rgba(255, 200, 0, 0.2);
+      }
+      50% {
+        width: 500px;
+        height: 320px;
+        opacity: 0.85;
+        border-color: rgba(255, 180, 0, 0.6);
+      }
+      85% {
+        opacity: 0.75;
+        border-color: rgba(255, 180, 0, 0.4);
+      }
+      100% {
+        width: 60px;
+        height: 80px;
+        opacity: 0;
+        border-color: rgba(255, 180, 0, 0);
+        box-shadow: 0 0 0 rgba(255, 165, 0, 0);
+      }
+    }
+    @keyframes holo-scan {
+      0% { left: -100%; }
+      100% { left: 200%; }
+    }
+    @keyframes holo-lines {
+      0% { opacity: 0.1; }
+      50% { opacity: 0.25; }
+      100% { opacity: 0.1; }
+    }
+    
+    /* Bottom controls */
+    .bottom-controls {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1100; /* UI controls on top */
+      pointer-events: all;
+    }
+    
+    .recent-crafts {
+      background: linear-gradient(135deg, rgba(20, 15, 13, 0.95), rgba(15, 10, 8, 0.98));
+      border: 1px solid rgba(224, 71, 60, 0.4);
+      border-radius: 8px;
+      padding: 10px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(10px);
+    }
+    
+    .recent-title {
+      font-size: 9px;
+      font-weight: 700;
+      color: #c9d0d8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+    
+    .craft-items {
+      display: grid;
+      grid-template-columns: repeat(16, 1fr);
+      gap: 8px;
+    }
+    
+    .craft-item {
+      width: 55px;
+      height: 55px;
+      background: rgba(224, 71, 60, 0.1);
+      border: 1px solid rgba(224, 71, 60, 0.3);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background-size: cover;
+      background-position: center;
+      color: #7b8088;
+      font-size: 10px;
+    }
+    
+    .craft-item:hover {
+      border-color: #e0473c;
+      background: rgba(224, 71, 60, 0.2);
+      transform: scale(1.05);
+    }
+    .forge-status {
+      margin-top: 10px;
+      font-size: 10px;
+      color: #9aa3ad;
+      min-height: 14px;
+    }
+    .forge-status.active { color: #ffb199; }
+    .forge-status.success { color: #7ddc9b; }
+    .forge-status.error { color: #ef5a5a; }
+    /* --- Additional Forge Atmosphere and Effects (from uitesting) --- */
+    #design-overlay {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 900; /* behind panels (1100) but in front of flames (800) */
+      background-image: url('./frame/fg1.png');
+      background-size: 100% 100%; background-position: center;
+      opacity: 1.0; display: block;
+    }
+
+    #forge-atmosphere {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      z-index: 800; /* sequence position 4 (effects group) */
+      overflow: hidden; pointer-events: none;
+      background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%);
+    }
+
+    .fire-container {
+      position: absolute;
+      bottom: 36px;
+      width: 260px;
+      height: 340px;
+      z-index: 775; /* below other effects, above furnace */
+      pointer-events: none;
+      filter: blur(0.8px);
+    }
+    .fire-left { 
+      left: 5%; 
+      transform: rotateZ(10deg);
+      transform-origin: center bottom;
+    }
+    .fire-right { 
+      right: 5%; 
+      transform: rotateZ(-10deg);
+      transform-origin: center bottom;
+    }
+
+    .flame {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 50% 100%,
+          rgba(255, 200, 0, 0.9) 0%,
+          rgba(255, 100, 0, 0.7) 20%,
+          rgba(255, 50, 0, 0.5) 40%,
+          rgba(200, 0, 0, 0.2) 60%,
+          transparent 80%);
+      animation: flicker-flame 0.35s infinite alternate;
+      transform-origin: bottom center;
+      opacity: 0.9;
+    }
+
+    .flame-core {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 78%;
+      height: 60%;
+      background: radial-gradient(ellipse at 50% 100%,
+          rgba(255, 255, 200, 1) 0%,
+          rgba(255, 200, 100, 0.9) 10%,
+          rgba(255, 150, 0, 0.6) 30%,
+          transparent 50%);
+      animation: core-pulse 0.6s infinite alternate;
+      filter: blur(2px);
+    }
+
+    @keyframes flicker-flame { 0% { transform: scaleY(1) scaleX(1); } 50% { transform: scaleY(1.05) scaleX(0.95);} 100% { transform: scaleY(0.98) scaleX(1.02);} }
+    @keyframes core-pulse { 0% { transform: translateX(-50%) scale(1); } 100% { transform: translateX(-50%) scale(1.18); } }
+
+    .fire-particle { position: absolute; bottom: 0; width: 8px; height: 8px; background: radial-gradient(circle, rgba(255,150,0,1), transparent); border-radius:50%; animation: rise-particle 3.5s infinite; opacity:0; }
+    @keyframes rise-particle { 0% { transform: translateY(0) translateX(0) scale(1); opacity:0;} 10% { opacity:1;} 50% { transform: translateY(-160px) translateX(var(--drift-x)) scale(0.8); opacity:0.8;} 100% { transform: translateY(-360px) translateX(calc(var(--drift-x) * 2)) scale(0.3); opacity:0;} }
+
+    .heat-shimmer { position: absolute; bottom: 0; width: 100%; height: 420px; z-index: 800; pointer-events: none; background: linear-gradient(to top, rgba(255,100,0,0.035) 0%, transparent 60%); filter: blur(3px); animation: shimmer 2s infinite; }
+
+    @keyframes shimmer { 0%,100% { transform: skewX(0) translateX(0); opacity:0.28 } 50% { transform: skewX(1deg) translateX(2px); opacity:0.38 } }
+
+    /* Steam / fog puffs */
+    .steam-particle { position: fixed; bottom: -100px; z-index: 900; pointer-events: none; background-image: url('./frame/steam.png'); background-size: contain; background-repeat: no-repeat; background-position: center; opacity: 0; transform-origin: center center; }
+    .steam-left { animation: dragon-vent-left var(--steam-duration) cubic-bezier(0.2,0.8,0.6,1.0) forwards; }
+    .steam-right { animation: dragon-vent-right var(--steam-duration) cubic-bezier(0.2,0.8,0.6,1.0) forwards; }
+    @keyframes dragon-vent-left { 0% { opacity:0; transform: translate(0,0) scale(0.1) rotate(0deg);} 5% { opacity:0.8; transform: translate(calc(var(--dest-x) * 0.1), calc(var(--dest-y) * 0.1)) scale(0.5) rotate(5deg);} 70% { opacity:0.5;} 100% { opacity:0; transform: translate(var(--dest-x), var(--dest-y)) scale(4) rotate(var(--rotation)); } }
+    @keyframes dragon-vent-right { 0% { opacity:0; transform: translate(0,0) scale(-0.1,0.1) rotate(0deg);} 5% { opacity:0.8; transform: translate(calc(var(--dest-x) * 0.1), calc(var(--dest-y) * 0.1)) scale(-0.5,0.5) rotate(-5deg);} 70% { opacity:0.5;} 100% { opacity:0; transform: translate(var(--dest-x), var(--dest-y)) scale(-4,4) rotate(var(--rotation)); } }
+
+    /* Fire Glow Overlay - Anchored Steam Effect */
+    .fire-glow-container {
+      position: absolute;
+      bottom: 36px;
+      width: 260px;
+      height: 340px;
+      z-index: 776; /* just above fire */
+      pointer-events: none;
+    }
+
+    .fire-glow {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('./frame/steam.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+
+    .fire-glow.red {
+      filter: sepia(100%) saturate(500%) brightness(1.2) hue-rotate(-50deg);
+      animation: pulse-glow-red 1.5s infinite ease-in-out;
+    }
+
+    .fire-glow.orange {
+      filter: sepia(100%) saturate(600%) brightness(1.4) hue-rotate(10deg);
+      animation: pulse-glow-orange 2.2s infinite ease-in-out;
+      animation-delay: 0.15s;
+    }
+
+    .fire-glow.orange-screen {
+      filter: sepia(100%) saturate(600%) brightness(1.4) hue-rotate(10deg);
+      animation: pulse-glow-orange-screen 1.8s infinite ease-in-out;
+      animation-delay: 0.15s;
+      mix-blend-mode: screen;
+    }
+
+    .fire-glow.yellow {
+      filter: sepia(100%) saturate(800%) brightness(1.6) hue-rotate(30deg);
+      animation: pulse-glow-yellow 2.5s infinite ease-in-out;
+      animation-delay: 0.25s;
+    }
+
+    .fire-glow.white {
+      filter: brightness(2.5) saturate(0);
+      animation: pulse-glow-white 3s infinite ease-in-out;
+      animation-delay: 0.1s;
+      mix-blend-mode: screen;
+    }
+
+    @keyframes pulse-glow-red {
+      0% { opacity: 0.25; transform: scale(1) rotate(0deg); }
+      25% { opacity: 0.35; transform: scale(1.15) rotate(30deg); }
+      50% { opacity: 0.25; transform: scale(1) rotate(-15deg); }
+      75% { opacity: 0.35; transform: scale(1.15) rotate(30deg); }
+      100% { opacity: 0.25; transform: scale(1) rotate(0deg); }
+    }
+
+    @keyframes pulse-glow-orange {
+      0% { opacity: 0.25; transform: scale(0.7) rotate(0deg); }
+      25% { opacity: 0.35; transform: scale(0.805) rotate(30deg); }
+      50% { opacity: 0.25; transform: scale(0.7) rotate(-15deg); }
+      75% { opacity: 0.35; transform: scale(0.805) rotate(30deg); }
+      100% { opacity: 0.25; transform: scale(0.7) rotate(0deg); }
+    }
+
+    @keyframes pulse-glow-orange-screen {
+      0% { opacity: 0.25; transform: scale(0.7) rotate(0deg); }
+      25% { opacity: 0.35; transform: scale(0.805) rotate(30deg); }
+      50% { opacity: 0.25; transform: scale(0.7) rotate(-15deg); }
+      75% { opacity: 0.35; transform: scale(0.805) rotate(30deg); }
+      100% { opacity: 0.25; transform: scale(0.7) rotate(0deg); }
+    }
+
+    @keyframes pulse-glow-yellow {
+      0% { opacity: 0.1875; transform: scale(0.4165) rotate(0deg); }
+      50% { opacity: 0.2625; transform: scale(0.5635) rotate(0deg); }
+      100% { opacity: 0.1875; transform: scale(0.4165) rotate(0deg); }
+    }
+
+    @keyframes pulse-glow-white {
+      0% { opacity: 0; transform: scale(0.15) translate(5px, 0); }
+      25% { opacity: 0.6; transform: scale(0.15) translate(0, -5px); }
+      50% { opacity: 0.3; transform: scale(0.15) translate(-5px, 0); }
+      75% { opacity: 0.6; transform: scale(0.15) translate(0, 5px); }
+      100% { opacity: 0; transform: scale(0.15) translate(5px, 0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-background"></div>
+  <header>
+    <div class="nav">
+      <a href="home.html" class="brand">
+        <div class="brand-icon">N</div>
+        <span>NEUROFOUNDRY</span>
+      </a>
+      <div class="links">
+        <a class="navlink" href="home.html">Home</a>
+        <a class="navlink" href="forge_final.html">Forge</a>
+        <a class="navlink" href="projects.html">Projects</a>
+        <a class="navlink" href="technology.html">Technology</a>
+        <a class="btn primary" href="signup.html">Request Access</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="forge-container">
+    <!-- Furnace background split into back (bg) and front (frame) -->
+    <div class="furnace-back"></div>
+    <div class="furnace-front"></div>
+    <div class="furnace-overlay"></div>
+
+    <!-- Design foreground overlay (decorative layering) -->
+    <div id="design-overlay"></div>
+
+    <!-- Full-scene atmosphere container (embers + steam spawn) -->
+    <div id="forge-atmosphere"></div>
+
+    <!-- Fire / Flames (left + right) -->
+    <div class="fire-container fire-left" aria-hidden="true">
+      <div class="flame" style="--flicker-speed:0.33s;"></div>
+      <div class="flame" style="--flicker-speed:0.43s; opacity:0.85;"></div>
+      <div class="flame-core" style="--pulse-speed:0.6s;"></div>
+    </div>
+    <div class="fire-glow-container fire-left" aria-hidden="true">
+      <div class="fire-glow red"></div>
+      <div class="fire-glow orange"></div>
+      <div class="fire-glow orange-screen"></div>
+      <div class="fire-glow yellow"></div>
+      <div class="fire-glow white"></div>
+    </div>
+    <div class="fire-container fire-right" aria-hidden="true">
+      <div class="flame" style="--flicker-speed:0.36s;"></div>
+      <div class="flame" style="--flicker-speed:0.46s; opacity:0.85;"></div>
+      <div class="flame-core" style="--pulse-speed:0.65s;"></div>
+    </div>
+    <div class="fire-glow-container fire-right" aria-hidden="true">
+      <div class="fire-glow red"></div>
+      <div class="fire-glow orange"></div>
+      <div class="fire-glow orange-screen"></div>
+      <div class="fire-glow yellow"></div>
+      <div class="fire-glow white"></div>
+    </div>
+
+    <!-- Heat shimmer above the furnace mouth -->
+    <div class="heat-shimmer" aria-hidden="true"></div>
+
+    <!-- Floating embers (fallback static items; dynamic embers also spawn into #forge-atmosphere) -->
+    <div class="ember-container">
+      <div class="ember"></div>
+      <div class="ember"></div>
+      <div class="ember"></div>
+      <div class="ember"></div>
+      <div class="ember"></div>
+      <div class="ember"></div>
+      <div class="ember"></div>
+      <div class="ember"></div>
+    </div>
+    
+    <!-- Media Viewer (sits in furnace opening - between furnace and furnacebg) -->
+    <div class="media-viewer">
+      <div class="media-container">
+        <div class="media-content" id="mediaContent">
+          <div class="media-placeholder">
+            <div class="placeholder-icon">+</div>
+            <div class="placeholder-text">Render preview will appear here.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Main workspace -->
+    <div class="workspace">
+      <!-- Panels overlay -->
+      <div class="panels-container">
+        <!-- Header with labels -->
+        <div class="furnace-header">
+          <div class="header-label">Forge Preview</div>
+          
+        </div>
+        
+        <!-- Side panels -->
+        <div class="panels-row">
+          <!-- Left panels -->
+          <div class="left-panels">
+            <!-- Origin Panel -->
+            <div class="panel">
+              <div class="panel-header">
+                <div class="step-number">1</div>
+                <div class="panel-title">Origin</div>
+              </div>
+              <p class="panel-description">The seed. Drop your starting frame here.</p>
+              <div class="upload-zone">
+                <div class="upload-icon">+</div>
+                <input type="file" id="originUpload" style="display: none;" accept="image/*">
+              </div>
+            </div>
+
+            <!-- Fusion Panel -->
+            <div class="panel">
+              <div class="panel-header">
+                <div class="step-number">2</div>
+                <div class="panel-title">Fusion</div>
+              </div>
+              <p class="panel-description">Blend elements. Subject + Scene + Style = Origin.</p>
+              
+              <div class="fusion-grid" id="fusionGrid">
+                <label class="fusion-item" data-role="subject" id="fusionSubject">
+                  <div class="fusion-label">Subject</div>
+                  <div class="fusion-hint">Drop or click</div>
+                  <input type="file" id="fusionSubjectInput" accept="image/*">
+                  <span class="fusion-check"></span>
+                </label>
+                <label class="fusion-item" data-role="scene" id="fusionScene">
+                  <div class="fusion-label">Scene</div>
+                  <div class="fusion-hint">Drop or click</div>
+                  <input type="file" id="fusionSceneInput" accept="image/*">
+                  <span class="fusion-check"></span>
+                </label>
+                <label class="fusion-item" data-role="style" id="fusionStyle">
+                  <div class="fusion-label">Style</div>
+                  <div class="fusion-hint">Optional</div>
+                  <input type="file" id="fusionStyleInput" accept="image/*">
+                  <span class="fusion-check"></span>
+                </label>
+              </div>
+              <div class="fusion-status" id="fusionStatus">Waiting for subject + scene.</div>
+              <button class="generate-btn" disabled>Generate Image</button>
+              <button class="furnace-toggle-btn" id="furnace-toggle">Toggle Frame</button>
+            </div>
+          </div>
+
+          <!-- Right Panel: Assemble -->
+          <div class="panel right-panel">
+            <div class="panel-header">
+              <div class="step-number">3</div>
+              <div class="panel-title">Assemble</div>
+            </div>
+            <p class="panel-description">Define the vision. Style, context, and motion - woven into one.</p>
+            
+            <div class="input-group">
+              <label class="input-label">Style</label>
+              <select class="input-select" id="styleSelect">
+                <option>Cinematic</option>
+                <option>Documentary</option>
+                <option>Artistic</option>
+                <option>Dramatic</option>
+              </select>
+            </div>
+            
+            <div class="input-group">
+              <label class="input-label">Positive Prompt</label>
+              <textarea class="input-field" id="positivePrompt" placeholder="Describe the subject...">A fantasy creature in its habitat</textarea>
+            </div>
+            
+            <div class="input-group">
+              <label class="input-label">Scene Prompt</label>
+              <textarea class="input-field" id="scenePrompt" placeholder="Describe the scene...">A mystical forest with glow</textarea>
+            </div>
+            
+            <div class="input-group">
+              <label class="input-label">Negative Prompt</label>
+              <textarea class="input-field" id="negativePrompt" placeholder="Avoid, exclude, or downplay...">A majestic dragon soaring over a mystical forest at dawn.</textarea>
+            </div>
+            
+            <button class="ai-generate-btn">Let AI Compose</button>
+            
+            <button class="render-btn">FORGE IT</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Bottom controls -->
+      <div class="bottom-controls">
+        <div class="recent-crafts">
+          <div class="recent-title">Recent Crafts</div>
+          <div class="craft-items">
+            <div class="craft-item"></div>
+            <div class="craft-item"></div>
+            <div class="craft-item"></div>
+            <div class="craft-item"></div>
+            <div class="craft-item"></div>
+            <div class="craft-item"></div>
+            <div class="craft-item"></div>
+            <div class="craft-item"></div>
+            <div class="craft-item"></div>
+            <div class="craft-item"></div>
+            <div class="craft-item"></div>
+            <div class="craft-item"></div>
+            <div class="craft-item"></div>
+            <div class="craft-item"></div>
+            <div class="craft-item"></div>
+            <div class="craft-item"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- Atmosphere: dynamic embers, steam/ smoke bursts, and fire particles ---
+    (function(){
+      const atmosphere = document.getElementById('forge-atmosphere');
+
+      // Dynamic embers that float upward inside the atmosphere layer
+      if (atmosphere) {
+        const emberCount = 48;
+        for (let i = 0; i < emberCount; i++) {
+          const ember = document.createElement('div');
+          ember.className = 'ember';
+          ember.style.left = (Math.random() * 100) + '%';
+          ember.style.top = (Math.random() * 50 + 30) + '%';
+          ember.style.animationDuration = (4 + Math.random() * 5) + 's';
+          ember.style.animationDelay = -(Math.random() * 8) + 's';
+          ember.style.setProperty('--drift', (Math.random() * 80 - 40) + 'px');
+          atmosphere.appendChild(ember);
+        }
+      }
+
+      // Create steam / smoke puffs near the media viewer (left/right)
+      function createSteamBurst(side) {
+        const media = document.querySelector('.media-viewer');
+        const rect = media ? media.getBoundingClientRect() : { left: window.innerWidth / 2, right: window.innerWidth / 2 };
+        const spawnX = side === 'left' ? (rect.left + 30) : (rect.right - 30);
+        const clusterSize = 6;
+        const baseDuration = 3500;
+
+        for (let i = 0; i < clusterSize; i++) {
+          const steam = document.createElement('div');
+          steam.classList.add('steam-particle', side === 'left' ? 'steam-left' : 'steam-right');
+          steam.style.left = spawnX + 'px';
+          const size = Math.random() * 140 + 80;
+          steam.style.width = size + 'px';
+          steam.style.height = size + 'px';
+          const duration = baseDuration + (Math.random() * 1800);
+          steam.style.setProperty('--steam-duration', duration + 'ms');
+          const spread = (Math.random() * 400 - 200);
+          const finalX = side === 'left' ? (-100 + spread) + 'px' : (100 + spread) + 'px';
+          const finalY = (-100 - (Math.random() * 20)) + 'vh';
+          steam.style.setProperty('--dest-x', finalX);
+          steam.style.setProperty('--dest-y', finalY);
+          const rot = (Math.random() * 90 - 45) + 'deg';
+          steam.style.setProperty('--rotation', rot);
+          document.body.appendChild(steam);
+          setTimeout(() => { steam.remove(); }, duration);
+        }
+      }
+
+      const allowedIntervals = [12000, 18000, 25000];
+      function scheduleNextBurst(side) {
+        const nextInterval = allowedIntervals[Math.floor(Math.random() * allowedIntervals.length)];
+        setTimeout(() => { createSteamBurst(side); scheduleNextBurst(side); }, nextInterval);
+      }
+      setTimeout(() => { createSteamBurst('left'); scheduleNextBurst('left'); }, 2000);
+      setTimeout(() => { createSteamBurst('right'); scheduleNextBurst('right'); }, 6000);
+
+      // Fire particles rising from each fire container
+      function createFireParticles(container) {
+        if (!container) return;
+        const particleCount = 16;
+        for (let i = 0; i < particleCount; i++) {
+          const particle = document.createElement('div');
+          particle.className = 'fire-particle';
+          particle.style.setProperty('--particle-x', (Math.random() * 80 + 10) + '%');
+          particle.style.setProperty('--drift-x', (Math.random() * 60 - 30) + 'px');
+          particle.style.setProperty('--rise-duration', (Math.random() * 2 + 2) + 's');
+          particle.style.setProperty('--particle-delay', -(Math.random() * 4) + 's');
+          container.appendChild(particle);
+        }
+      }
+
+      createFireParticles(document.querySelector('.fire-left'));
+      createFireParticles(document.querySelector('.fire-right'));
+    })();
+
+      const REMBG_API = 'https://nfcr-extractor.onrender.com/extract';
+      const CAPTION_API = 'https://nfcr-synthesize.onrender.com/features/4/caption';
+      const RENDER_API = 'https://nfcr-synthesize.onrender.com/features/4/render';
+      const FUSION_API = 'https://prmptrndr.csirico9.workers.dev/fusion';
+      const SYNTH_API = 'https://synth.csirico9.workers.dev';
+      const AUTH_KEY = 'Tr1bXimgEnV1-sdbAI25';
+
+      const uploadZone = document.querySelector('.upload-zone');
+      const originInput = document.getElementById('originUpload');
+      const fusionGrid = document.getElementById('fusionGrid');
+      const fusionStatus = document.getElementById('fusionStatus');
+      const fusionSubjectInput = document.getElementById('fusionSubjectInput');
+      const fusionSceneInput = document.getElementById('fusionSceneInput');
+      const fusionStyleInput = document.getElementById('fusionStyleInput');
+      const fusionSubject = document.getElementById('fusionSubject');
+      const fusionScene = document.getElementById('fusionScene');
+      const fusionStyle = document.getElementById('fusionStyle');
+      const generateBtn = document.querySelector('.generate-btn');
+      const renderBtn = document.querySelector('.render-btn');
+      const mediaViewer = document.querySelector('.media-viewer');
+      const mediaContent = document.getElementById('mediaContent');
+      const statusEl = document.getElementById('forgeStatus');
+      const recentContainer = document.querySelector('.craft-items');
+      const styleSelect = document.getElementById('styleSelect');
+      const positivePrompt = document.getElementById('positivePrompt');
+      const scenePrompt = document.getElementById('scenePrompt');
+      const negativePrompt = document.getElementById('negativePrompt');
+
+      const RECENT_KEY = 'forgeRecentRenders';
+      const MAX_RECENT = 16;
+      const AUTO_DOWNLOAD = true;
+
+      let originImage = null;
+      let subjectImage = null;
+      let backgroundImage = null;
+      let styleImage = null;
+      let extractedSubject = null;
+      let cdpContext = null;
+      let acpContext = null;
+      let sipContext = null;
+      let mergedImage = null;
+      let isProcessing = false;
+
+      function setStatus(message, level) {
+        if (!statusEl) return;
+        statusEl.textContent = message;
+        statusEl.className = `forge-status ${level || ''}`.trim();
+      }
+
+      function setFusionStatus(message) {
+        if (!fusionStatus) return;
+        fusionStatus.textContent = message;
+      }
+
+      function setProcessing(state) {
+        isProcessing = state;
+        if (mediaViewer) {
+          mediaViewer.classList.toggle('processing', state);
+        }
+        updateRenderState();
+      }
+
+      function updateRenderState() {
+        if (renderBtn) {
+          if (isProcessing) {
+            renderBtn.disabled = true;
+          } else if (originImage) {
+            renderBtn.disabled = false;
+          } else {
+            renderBtn.disabled = !(mergedImage && cdpContext && acpContext && sipContext);
+          }
+        }
+        updateFusionChecklist();
+      }
+
+      function updateFusionChecklist() {
+        if (!generateBtn) return;
+        const ready = !!(subjectImage && backgroundImage);
+        generateBtn.disabled = !ready || isProcessing || !!originImage;
+      }
+
+      function displayImage(imageSrc) {
+        if (!mediaContent) return;
+        mediaContent.innerHTML = `<img src="${imageSrc}" alt="Render" />`;
+      }
+
+      function showPlaceholder() {
+        if (!mediaContent) return;
+        mediaContent.innerHTML = `
+          <div class="media-placeholder">
+            <div class="placeholder-icon">+</div>
+            <div class="placeholder-text">Render preview will appear here.</div>
+          </div>
+        `;
+      }
+
+      function updateUploadZoneLabel(name) {
+        if (!uploadZone) return;
+        if (!name) {
+          uploadZone.innerHTML = `
+            <div class="upload-icon">+</div>
+            <div style="font-size: 9px; color: #9aa3ad; margin-top: 4px;">Drop image</div>
+          `;
+          return;
+        }
+        uploadZone.innerHTML = `
+          <div class="upload-icon">+</div>
+          <div style="font-size: 9px; color: #9aa3ad; margin-top: 4px;">${name}</div>
+        `;
+      }
+
+      function readFile(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = () => reject(new Error('File read failed'));
+          reader.readAsDataURL(file);
+        });
+      }
+
+      function setFusionImage(el, dataUrl) {
+        if (!el) return;
+        el.classList.add('has-image');
+        el.style.backgroundImage = `url(${dataUrl})`;
+      }
+
+      function clearFusionImage(el) {
+        if (!el) return;
+        el.classList.remove('has-image');
+        el.style.backgroundImage = '';
+      }
+
+      function resetFusionState() {
+        subjectImage = null;
+        backgroundImage = null;
+        styleImage = null;
+        extractedSubject = null;
+        cdpContext = null;
+        acpContext = null;
+        sipContext = null;
+        mergedImage = null;
+        clearFusionImage(fusionSubject);
+        clearFusionImage(fusionScene);
+        clearFusionImage(fusionStyle);
+        setFusionStatus('Waiting for subject + scene.');
+        updateRenderState();
+      }
+
+      function enableFusion(enabled) {
+        if (!fusionGrid) return;
+        fusionGrid.classList.toggle('disabled', !enabled);
+      }
+
+      function clearOrigin() {
+        originImage = null;
+        updateUploadZoneLabel('');
+        showPlaceholder();
+      }
+
+      async function handleOriginFile(file) {
+        if (!file) return;
+        const dataUrl = await readFile(file);
+        originImage = dataUrl;
+        displayImage(dataUrl);
+        enableFusion(false);
+        resetFusionState();
+        setFusionStatus('Fusion disabled. Origin image loaded.');
+        setStatus('Origin loaded. Ready to forge.', 'success');
+        updateRenderState();
+      }
+
+      async function handleFusionFile(role, file) {
+        if (!file) return;
+        const dataUrl = await readFile(file);
+        if (originImage) {
+          clearOrigin();
+          enableFusion(true);
+        }
+        if (role === 'subject') {
+          subjectImage = dataUrl;
+          setFusionImage(fusionSubject, dataUrl);
+        } else if (role === 'scene') {
+          backgroundImage = dataUrl;
+          setFusionImage(fusionScene, dataUrl);
+        } else if (role === 'style') {
+          styleImage = dataUrl;
+          setFusionImage(fusionStyle, dataUrl);
+        }
+        if (subjectImage && backgroundImage) {
+          await runFusionPipeline();
+        } else {
+          setFusionStatus('Waiting for subject + scene.');
+        }
+      }
+
+      if (uploadZone && originInput) {
+        uploadZone.addEventListener('click', () => originInput.click());
+        uploadZone.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          uploadZone.style.borderColor = '#e0473c';
+          uploadZone.style.background = 'rgba(224, 71, 60, 0.15)';
+        });
+        uploadZone.addEventListener('dragleave', () => {
+          uploadZone.style.borderColor = 'rgba(224, 71, 60, 0.4)';
+          uploadZone.style.background = 'rgba(224, 71, 60, 0.05)';
+        });
+        uploadZone.addEventListener('drop', async (e) => {
+          e.preventDefault();
+          uploadZone.style.borderColor = 'rgba(224, 71, 60, 0.4)';
+          uploadZone.style.background = 'rgba(224, 71, 60, 0.05)';
+          await handleOriginFile(e.dataTransfer.files[0]);
+        });
+        originInput.addEventListener('change', async (e) => {
+          await handleOriginFile(e.target.files[0]);
+        });
+      }
+
+      function bindFusionInput(item, input, role) {
+        if (!item || !input) return;
+        item.addEventListener('click', () => input.click());
+        item.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          item.style.borderColor = '#e0473c';
+        });
+        item.addEventListener('dragleave', () => {
+          item.style.borderColor = 'rgba(224, 71, 60, 0.3)';
+        });
+        item.addEventListener('drop', async (e) => {
+          e.preventDefault();
+          item.style.borderColor = 'rgba(224, 71, 60, 0.3)';
+          await handleFusionFile(role, e.dataTransfer.files[0]);
+        });
+        input.addEventListener('change', async (e) => {
+          await handleFusionFile(role, e.target.files[0]);
+        });
+      }
+
+      bindFusionInput(fusionSubject, fusionSubjectInput, 'subject');
+      bindFusionInput(fusionScene, fusionSceneInput, 'scene');
+      bindFusionInput(fusionStyle, fusionStyleInput, 'style');
+
+      const SIP_INSTRUCTION = `TASK: Identify the visual style of this image.
+
+Output two lines only:
+Color palette: <short palette>
+Style: <short style>
+`;
+
+      async function runCdp(imageData) {
+        const response = await fetch(`${FUSION_API}/cdp`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-auth-key': AUTH_KEY },
+          body: JSON.stringify({ image_base64: imageData })
+        });
+        if (!response.ok) throw new Error(`CDP failed: ${response.status}`);
+        const data = await response.json();
+        return data.cdp || data.caption || data.output || '';
+      }
+
+      async function runAcp(imageData) {
+        const response = await fetch(`${FUSION_API}/acp`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-auth-key': AUTH_KEY },
+          body: JSON.stringify({ image_base64: imageData })
+        });
+        if (!response.ok) throw new Error(`ACP failed: ${response.status}`);
+        const data = await response.json();
+        return data.acp || data.caption || data.output || '';
+      }
+
+      async function runSip(imageData) {
+        const response = await fetch(`${FUSION_API}/sip`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-auth-key': AUTH_KEY },
+          body: JSON.stringify({ image_base64: imageData, instruction: SIP_INSTRUCTION })
+        });
+        if (!response.ok) throw new Error(`SIP failed: ${response.status}`);
+        const data = await response.json();
+        return data.sip || data.caption || data.output || '';
+      }
+
+      async function runSynth(cdp, acp, sip) {
+        if (!cdp || !acp || !sip) {
+          throw new Error('Synth input missing one or more captions');
+        }
+        const combined = `${cdp} ${acp} ${sip}`;
+        const compressionPrompt = `Compress the following into a single vivid image caption. Maximum 75 tokens. Output only the caption:
+
+${combined}`;
+        const response = await fetch(SYNTH_API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-auth-key': AUTH_KEY },
+          body: JSON.stringify({ prompt: compressionPrompt })
+        });
+        const bodyText = await response.text();
+        if (!response.ok) throw new Error(`Synth failed ${response.status}`);
+        let data;
+        try {
+          data = JSON.parse(bodyText);
+        } catch (err) {
+          throw new Error('Synth returned non-JSON');
+        }
+        const result = data.synth || data.output || data.result || data.caption || data.text || '';
+        if (!result || !result.trim()) throw new Error('Synth returned empty output');
+        return result.trim();
+      }
+
+      async function extractSubject() {
+        setFusionStatus('Extracting subject...');
+        const response = await fetch(REMBG_API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image: subjectImage })
+        });
+        if (!response.ok) throw new Error(`Extraction failed: ${response.status}`);
+        const data = await response.json();
+        extractedSubject = data.image;
+        cdpContext = await runCdp(extractedSubject);
+      }
+
+      async function mergeImages() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 1024;
+        canvas.height = 576;
+        const ctx = canvas.getContext('2d');
+        const loadImg = (src) => new Promise((resolve) => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.src = src;
+        });
+        const [bgImg, subImg] = await Promise.all([
+          loadImg(backgroundImage),
+          loadImg(extractedSubject)
+        ]);
+        ctx.drawImage(bgImg, 0, 0, 1024, 576);
+        const scale = Math.min(1024 / subImg.width, 576 / subImg.height) * 0.8;
+        const w = subImg.width * scale;
+        const h = subImg.height * scale;
+        const x = (1024 - w) / 2;
+        const y = (576 - h) / 2;
+        ctx.drawImage(subImg, x, y, w, h);
+        mergedImage = canvas.toDataURL('image/png');
+        return mergedImage;
+      }
+
+      async function runFusionPipeline() {
+        if (isProcessing) return;
+        if (!subjectImage || !backgroundImage) return;
+        setProcessing(true);
+        try {
+          await extractSubject();
+          acpContext = await runAcp(backgroundImage);
+          mergedImage = await mergeImages();
+          displayImage(mergedImage);
+          sipContext = await runSip(mergedImage);
+          setFusionStatus('Fusion ready.');
+          setStatus('Fusion ready. Press Forge.', 'success');
+        } catch (err) {
+          console.error(err);
+          setFusionStatus(`Fusion failed: ${err.message}`);
+          setStatus(`Fusion failed: ${err.message}`, 'error');
+        } finally {
+          setProcessing(false);
+        }
+      }
+
+      function buildPrompt(basePrompt) {
+        const parts = [];
+        if (basePrompt) parts.push(basePrompt);
+        if (styleSelect && styleSelect.value) parts.push(styleSelect.value);
+        if (positivePrompt && positivePrompt.value.trim()) parts.push(positivePrompt.value.trim());
+        if (scenePrompt && scenePrompt.value.trim()) parts.push(scenePrompt.value.trim());
+        return parts.join(', ');
+      }
+
+      function getNegativePrompt() {
+        if (!negativePrompt) return '';
+        return negativePrompt.value.trim();
+      }
+
+      function getRecentRenders() {
+        try {
+          const raw = localStorage.getItem(RECENT_KEY);
+          return raw ? JSON.parse(raw) : [];
+        } catch {
+          return [];
+        }
+      }
+
+      function saveRender(dataUrl) {
+        const renders = getRecentRenders();
+        renders.unshift(dataUrl);
+        const trimmed = renders.slice(0, MAX_RECENT);
+        localStorage.setItem(RECENT_KEY, JSON.stringify(trimmed));
+        renderRecent();
+      }
+
+      function downloadImage(dataUrl, filename) {
+        const link = document.createElement('a');
+        link.href = dataUrl;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      }
+
+      function renderRecent() {
+        if (!recentContainer) return;
+        const items = recentContainer.querySelectorAll('.craft-item');
+        const renders = getRecentRenders();
+        items.forEach((item, idx) => {
+          const render = renders[idx];
+          if (render) {
+            item.style.backgroundImage = `url(${render})`;
+            item.dataset.src = render;
+          } else {
+            item.style.backgroundImage = '';
+            item.dataset.src = '';
+          }
+        });
+      }
+
+      if (recentContainer) {
+        recentContainer.addEventListener('click', (e) => {
+          const target = e.target.closest('.craft-item');
+          if (!target) return;
+          const src = target.dataset.src;
+          if (!src) return;
+          displayImage(src);
+        });
+      }
+
+      async function renderImages(promptText, negativeText) {
+        const outputs = [];
+        const renderCount = 3;
+        for (let i = 1; i <= renderCount; i++) {
+          setStatus(`Rendering ${i}/${renderCount}...`, 'active');
+          const response = await fetch(RENDER_API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              method: 'prompt',
+              prompt: promptText,
+              negative_prompt: negativeText,
+              model: '@cf/stabilityai/stable-diffusion-xl-base-1.0',
+              width: 1024,
+              height: 576,
+              guidance_scale: 7.5,
+              num_inference_steps: 25
+            })
+          });
+          if (!response.ok) throw new Error(`Render ${i} failed: ${response.status}`);
+          const data = await response.json();
+          if (data.ok && data.image_base64) {
+            const dataUrl = `data:image/png;base64,${data.image_base64}`;
+            outputs.push(dataUrl);
+            displayImage(dataUrl);
+            saveRender(dataUrl);
+            if (AUTO_DOWNLOAD) {
+              downloadImage(dataUrl, `forge_render_${Date.now()}_${i}.png`);
+            }
+          }
+        }
+        return outputs;
+      }
+
+      if (renderBtn) {
+        renderBtn.addEventListener('click', async () => {
+          if (isProcessing) return;
+          setProcessing(true);
+          try {
+            let basePrompt = '';
+            if (!originImage) {
+              if (!mergedImage || !cdpContext || !acpContext || !sipContext) {
+                throw new Error('Fusion not ready. Add subject and scene first.');
+              }
+              basePrompt = await runSynth(cdpContext, acpContext, sipContext);
+            }
+            const promptText = buildPrompt(basePrompt);
+            const negativeText = getNegativePrompt();
+            await renderImages(promptText, negativeText);
+            setStatus('Render complete.', 'success');
+          } catch (err) {
+            setStatus(`Render failed: ${err.message}`, 'error');
+          } finally {
+            setProcessing(false);
+          }
+        });
+      }
+
+      if (generateBtn) {
+        generateBtn.addEventListener('click', async () => {
+          if (generateBtn.disabled) return;
+          await runFusionPipeline();
+        });
+      }
+
+      window.addEventListener('load', async () => {
+        renderRecent();
+        updateUploadZoneLabel('');
+        try {
+          await fetch('https://nfcr-extractor.onrender.com/health');
+          await fetch('https://nfcr-synthesize.onrender.com/features/4/images');
+        } catch (error) {
+          setStatus('Services not detected. Render may fail.', 'error');
+        }
+      });
+</script>
+  <script src="shared/page-transitions.js"></script>
+  <script src="shared/micro-interactions.js"></script>
+  <script src="chatbot-component.js"></script>
+  <script src="embers-effect.js"></script>
+</body>
+</html>
