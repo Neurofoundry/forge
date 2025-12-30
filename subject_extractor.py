@@ -15,8 +15,24 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
-ALLOWED_ORIGINS = ["https://forge.theneurofoundry.com"]
-CORS(app, resources={r"/*": {"origins": ALLOWED_ORIGINS}})
+ALLOWED_ORIGINS = {"https://forge.theneurofoundry.com"}
+CORS(app, resources={r"/*": {"origins": list(ALLOWED_ORIGINS)}})
+
+@app.before_request
+def handle_options():
+    if request.method == "OPTIONS":
+        response = app.make_default_options_response()
+        return response
+
+@app.after_request
+def add_cors_headers(response):
+    origin = request.headers.get("Origin")
+    if origin in ALLOWED_ORIGINS:
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Vary"] = "Origin"
+    response.headers["Access-Control-Allow-Methods"] = "GET,POST,OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, X-Requested-With"
+    return response
 
 OUTPUT_DIR = "extracted_subjects"
 COMPOSED_DIR = "composed_images"

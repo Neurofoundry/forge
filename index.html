@@ -1359,6 +1359,7 @@
       let sipContext = null;
       let mergedImage = null;
       let isProcessing = false;
+      let isExtracting = false;
 
       function setStatus(message, level) {
         if (!statusEl) return;
@@ -1506,8 +1507,14 @@
           enableFusion(true);
         }
         if (role === 'subject') {
+          extractedSubject = null;
+          cdpContext = null;
+          sipContext = null;
+          mergedImage = null;
           subjectImage = dataUrl;
           setFusionImage(fusionSubject, dataUrl);
+          await extractSubject();
+          return;
         } else if (role === 'scene') {
           backgroundImage = dataUrl;
           setFusionImage(fusionScene, dataUrl);
@@ -1515,7 +1522,7 @@
           styleImage = dataUrl;
           setFusionImage(fusionStyle, dataUrl);
         }
-        if (subjectImage && backgroundImage) {
+        if (extractedSubject && backgroundImage) {
           await runFusionPipeline();
         } else {
           setFusionStatus('Waiting for subject + scene.');
@@ -1634,29 +1641,41 @@ ${combined}`;
       }
 
       async function extractSubject() {
+        if (isExtracting || !subjectImage) return;
+        isExtracting = true;
         setFusionStatus('Extracting subject...');
-        let response;
         try {
-          response = await fetchWithTimeout(REMBG_API, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ image: subjectImage })
-          }, EXTRACT_TIMEOUT_MS);
-        } catch (err) {
-          if (err && err.name === 'AbortError') {
-            throw new Error('Extraction timed out');
+          let response;
+          try {
+            response = await fetchWithTimeout(REMBG_API, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ image: subjectImage })
+            }, EXTRACT_TIMEOUT_MS);
+          } catch (err) {
+            if (err && err.name === 'AbortError') {
+              throw new Error('Extraction timed out');
+            }
+            throw err;
           }
-          throw err;
-        }
-        if (!response.ok) throw new Error(`Extraction failed: ${response.status}`);
-        const data = await response.json();
-        extractedSubject = data.image;
-        try {
-          cdpContext = await runCdp(extractedSubject);
-        } catch (err) {
-          console.error(err);
-          cdpContext = '';
-          setFusionStatus('CDP failed. Extraction ok.');
+          if (!response.ok) throw new Error(`Extraction failed: ${response.status}`);
+          const data = await response.json();
+          extractedSubject = data.image;
+          try {
+            cdpContext = await runCdp(extractedSubject);
+          } catch (err) {
+            console.error(err);
+            cdpContext = '';
+            setFusionStatus('CDP failed. Extraction ok.');
+          }
+          if (backgroundImage) {
+            setFusionStatus('Subject extracted. Continuing fusion.');
+            await runFusionPipeline();
+          } else {
+            setFusionStatus('Subject extracted. Add scene.');
+          }
+        } finally {
+          isExtracting = false;
         }
       }
 
@@ -1690,7 +1709,9 @@ ${combined}`;
         if (!subjectImage || !backgroundImage) return;
         setProcessing(true);
         try {
-          await extractSubject();
+          if (!extractedSubject) {
+            await extractSubject();
+          }
           try {
             acpContext = await runAcp(backgroundImage);
           } catch (err) {
