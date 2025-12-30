@@ -1,14 +1,39 @@
+import os
+
+os.environ.setdefault("OMP_NUM_THREADS", "1")
+os.environ.setdefault("MKL_NUM_THREADS", "1")
+os.environ.setdefault("NUMEXPR_NUM_THREADS", "1")
+os.environ.setdefault("ORT_DISABLE_CPU_MEM_ARENA", "1")
+os.environ.setdefault("ORT_DISABLE_MEM_PATTERN", "1")
+
 from flask import Flask, request, jsonify, send_file, send_from_directory
 from flask_cors import CORS
 from rembg import remove, new_session
-from PIL import Image, ImageEnhance, ImageFilter, ImageOps
+from PIL import Image
 import io
 import base64
-import os
 import logging
-import numpy as np
-from scipy.ndimage import gaussian_filter
-import requests  # For calling ControlNet service
+
+np = None
+gaussian_filter = None
+ImageEnhance = None
+ImageFilter = None
+ImageOps = None
+requests = None
+
+def _lazy_imports():
+    global np, gaussian_filter, ImageEnhance, ImageFilter, ImageOps, requests
+    if np is None:
+        import numpy as _np
+        from scipy.ndimage import gaussian_filter as _gaussian_filter
+        from PIL import ImageEnhance as _ImageEnhance, ImageFilter as _ImageFilter, ImageOps as _ImageOps
+        import requests as _requests
+        np = _np
+        gaussian_filter = _gaussian_filter
+        ImageEnhance = _ImageEnhance
+        ImageFilter = _ImageFilter
+        ImageOps = _ImageOps
+        requests = _requests
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -137,6 +162,7 @@ def health():
 
 @app.route('/compose', methods=['POST'])
 def compose_image():
+    _lazy_imports()
     """
     Intelligently compose subject + scene + style:
     - Uses ControlNet when style is drastically different from scene
@@ -738,8 +764,8 @@ if __name__ == '__main__':
     print("="*60)
     print("🎨 Subject Extractor & Composer Service")
     print("="*60)
-    print("📍 Local:   http://localhost:5001")
-    print("📍 Network: http://0.0.0.0:5001")
+    print(f"?? Local:   http://localhost:{port}")
+    print(f"?? Network: http://0.0.0.0:{port}")
     print("="*60)
     print("💡 Endpoints:")
     print("   GET  /              - Test interface")
