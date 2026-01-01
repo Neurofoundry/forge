@@ -74,6 +74,75 @@
       transition: color 0.2s;
     }
     .navlink:hover { color: #e0473c; }
+    .nav-item { position: relative; }
+    .dropdown-toggle {
+      background: none;
+      border: none;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      color: #ccc;
+      font: 500 14px/1 Inter, sans-serif;
+      transition: color 0.2s;
+    }
+    .dropdown-toggle:hover,
+    .dropdown-toggle:focus-visible {
+      color: #e0473c;
+      outline: none;
+    }
+    .dropdown-caret {
+      font-size: 11px;
+      opacity: 0.7;
+    }
+    .dropdown-menu {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      min-width: 200px;
+      background: rgba(15, 17, 19, 0.96);
+      border: 1px solid rgba(224, 71, 60, 0.25);
+      border-radius: 12px;
+      padding: 10px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+      opacity: 0;
+      transform: translateY(6px);
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      z-index: 50;
+    }
+    .dropdown::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 100%;
+      height: 10px;
+    }
+    .dropdown-menu a {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      color: #c9d0d8;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      transition: background 0.2s, color 0.2s;
+      white-space: nowrap;
+    }
+    .dropdown-menu a:hover {
+      background: rgba(224, 71, 60, 0.18);
+      color: #fff;
+    }
+    .dropdown:hover .dropdown-menu,
+    .dropdown:focus-within .dropdown-menu {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
     .btn {
       display: inline-flex;
       align-items: center;
@@ -118,13 +187,20 @@
       left: 0;
       width: 100%;
       height: 100%;
-      z-index: 700; /* furnace frame visible in front of background */
-      background-image: url('./frame/furnace.png');
+      z-index: 450; /* sit just beneath the media viewer */
+      background-image: url('../../furnace.png');
       background-size: 60% auto;
       background-position: center center;
       background-repeat: no-repeat;
       background-attachment: fixed;
-      display: none; /* Hidden temporarily */
+      opacity: 1;
+      transition: opacity 0.3s ease;
+      -webkit-mask-image: linear-gradient(90deg, transparent 0%, transparent 15%, #000 35%, #000 65%, transparent 85%, transparent 100%);
+      mask-image: linear-gradient(90deg, transparent 0%, transparent 15%, #000 35%, #000 65%, transparent 85%, transparent 100%);
+    }
+    .furnace-front.is-hidden {
+      opacity: 0;
+      pointer-events: none;
     }
     .furnace-back {
       position: absolute;
@@ -133,12 +209,14 @@
       width: 100%;
       height: 100%;
       z-index: 0; /* place furnace background at the very bottom */
-      background-image: url('./frame/furnacebg.png');
+      background-image: url('../../furnacebg.png');
       background-size: cover;
       background-position: center center;
       background-repeat: no-repeat;
       background-attachment: fixed;
       animation: kenburns-loop 15s ease-in-out infinite;
+      -webkit-mask-image: linear-gradient(90deg, transparent 0%, transparent 15%, #000 35%, #000 65%, transparent 85%, transparent 100%);
+      mask-image: linear-gradient(90deg, transparent 0%, transparent 15%, #000 35%, #000 65%, transparent 85%, transparent 100%);
     }
 
     /* Page solid background moved here so furnace images can sit above it */
@@ -274,6 +352,7 @@
     
     .panel {
       /* Make panels solid and non-blended so they stand out above the furnace artwork */
+      position: relative;
       background: #0b0b0b; /* fully opaque */
       border: 1px solid rgba(224, 71, 60, 0.9);
       border-radius: 10px;
@@ -286,6 +365,61 @@
       overflow-y: auto;
       width: 220px;
       flex-shrink: 0;
+    }
+    .panel.right-panel {
+      max-height: 89%;
+    }
+    .synth-loading {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(6, 5, 4, 0.78);
+      border-radius: 10px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      z-index: 2;
+    }
+    .synth-loading.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .synth-loading-card {
+      padding: 16px 20px;
+      border-radius: 10px;
+      background: rgba(12, 9, 9, 0.9);
+      border: 1px solid rgba(224, 71, 60, 0.4);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+      text-align: center;
+      min-width: 180px;
+    }
+    .synth-loading-text {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #ffb3ab;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
+      margin-bottom: 10px;
+    }
+    .synth-loading-bar {
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(224, 71, 60, 0.15);
+      overflow: hidden;
+    }
+    .synth-loading-fill {
+      display: block;
+      height: 100%;
+      width: 45%;
+      background: linear-gradient(90deg, rgba(178, 28, 28, 0.4), rgba(224, 71, 60, 0.9));
+      animation: synth-loading 1.1s ease-in-out infinite;
+    }
+    @keyframes synth-loading {
+      0% { transform: translateX(-120%); }
+      100% { transform: translateX(220%); }
     }
     
     .panel::-webkit-scrollbar {
@@ -350,6 +484,43 @@
       transition: all 0.3s ease;
       position: relative;
       overflow: hidden;
+      min-height: 92px;
+    }
+    .upload-zone.has-origin {
+      padding: 0;
+      background: rgba(224, 71, 60, 0.08);
+    }
+    .origin-preview {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      pointer-events: none;
+    }
+    .origin-clear {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 1px solid rgba(224, 71, 60, 0.7);
+      background: rgba(12, 10, 10, 0.8);
+      color: #ffb3ab;
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 2;
+      box-shadow: 0 0 10px rgba(224, 71, 60, 0.4);
+    }
+    .origin-clear:hover {
+      background: rgba(224, 71, 60, 0.25);
+      color: #fff;
     }
     
     .upload-zone:hover {
@@ -390,6 +561,11 @@
       transition: all 0.2s;
       position: relative;
       overflow: hidden;
+    }
+    .fusion-item.is-locked {
+      cursor: default;
+      pointer-events: none;
+      opacity: 0.6;
     }
     
     .fusion-item:hover {
@@ -463,11 +639,58 @@
       opacity: 0.35;
       pointer-events: none;
     }
+    .fusion-clear {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 1px solid rgba(224, 71, 60, 0.7);
+      background: rgba(12, 10, 10, 0.8);
+      color: #ffb3ab;
+      font-size: 14px;
+      font-weight: 700;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 2;
+      box-shadow: 0 0 10px rgba(224, 71, 60, 0.4);
+    }
+    .fusion-clear.visible {
+      display: flex;
+    }
+    .fusion-clear:hover {
+      background: rgba(224, 71, 60, 0.25);
+      color: #fff;
+    }
     .fusion-status {
       margin-top: 8px;
       font-size: 9px;
       color: #9aa3ad;
       min-height: 12px;
+    }
+    .fusion-progress {
+      margin-top: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(224, 71, 60, 0.12);
+      border: 1px solid rgba(224, 71, 60, 0.3);
+      overflow: hidden;
+      box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.6);
+    }
+    .fusion-progress-fill {
+      display: block;
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, rgba(178, 28, 28, 0.6), rgba(224, 71, 60, 0.9));
+      transition: width 0.3s ease;
+    }
+    .panel-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
     }
     
     .furnace-toggle-btn {
@@ -480,6 +703,11 @@
       color: rgba(224, 71, 60, 0.6);
       cursor: pointer;
       transition: all 0.2s;
+    }
+    .furnace-toggle-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      box-shadow: none;
     }
     
     .furnace-toggle-btn:hover {
@@ -513,6 +741,14 @@
       box-shadow: none;
       transform: none;
     }
+    .ai-generate-btn:disabled,
+    .render-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+      pointer-events: none;
+    }
     
     .generate-btn:hover {
       background: linear-gradient(135deg, #e0473c, #ff7b6e);
@@ -530,9 +766,48 @@
       font-weight: 600;
       color: #c9d0d8;
       margin-bottom: 3px;
-      display: block;
+      display: flex;
+      align-items: center;
+      gap: 6px;
       text-transform: uppercase;
       letter-spacing: 0.2px;
+    }
+    .field-check {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 1px solid rgba(224, 71, 60, 0.35);
+      background: rgba(0, 0, 0, 0.45);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.6;
+      box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
+    }
+    .field-check::after {
+      content: '';
+      width: 6px;
+      height: 3px;
+      border-left: 2px solid #0b0b0b;
+      border-bottom: 2px solid #0b0b0b;
+      transform: rotate(-45deg);
+      opacity: 0;
+    }
+    .field-check.active {
+      background: rgba(46, 213, 115, 0.95);
+      border-color: rgba(46, 213, 115, 0.95);
+      opacity: 1;
+      box-shadow: 0 0 8px rgba(46, 213, 115, 0.6);
+    }
+    .field-check.active::after {
+      opacity: 1;
+    }
+    .right-panel-stack {
+      width: 220px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      pointer-events: all;
     }
     
     .input-field, .input-select {
@@ -577,35 +852,40 @@
     }
     
     .render-btn {
-      padding: 11px;
-      background: linear-gradient(135deg, #e0473c 0%, #ff7b6e 100%);
-      margin-top: 12px;
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 0.6px;
-      box-shadow: 0 6px 20px rgba(224, 71, 60, 0.5);
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .render-btn::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
       width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-      transition: left 0.5s;
+      margin-top: 12px;
+      background: transparent;
+      position: relative;
+      padding: 0;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      align-self: center;
+      cursor: pointer;
+      transition: transform 0.2s ease, filter 0.2s ease, opacity 0.2s ease;
     }
-    
-    .render-btn:hover::before {
-      left: 100%;
+    .render-btn img {
+      width: 190px;
+      max-width: 100%;
+      height: auto;
+      display: block;
+      filter: drop-shadow(0 6px 18px rgba(178, 28, 28, 0.4));
+      transition: filter 0.2s ease;
     }
-    
+    .render-btn.ready img {
+      filter:
+        drop-shadow(0 0 16px rgba(178, 28, 28, 0.75))
+        drop-shadow(0 0 28px rgba(150, 20, 20, 0.65))
+        drop-shadow(0 10px 24px rgba(178, 28, 28, 0.6));
+    }
+    .render-btn.is-disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
     .render-btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 8px 28px rgba(224, 71, 60, 0.6);
     }
     
     /* Left panels container */
@@ -625,7 +905,7 @@
       width: 47.5%;
       aspect-ratio: 16 / 9;
       background: #000000;
-      border: 1px solid rgba(224, 71, 60, 0.2);
+      border: none;
       border-radius: 2px;
       z-index: 500; /* behind furnace.png frame so video appears inside furnace */
       overflow: hidden;
@@ -695,6 +975,15 @@
     }
     .media-viewer.processing .holo-screen-container {
       opacity: 1;
+    }
+    .media-viewer.degen-active {
+      filter: url(#forge-wavy);
+    }
+    .svg-filters {
+      position: absolute;
+      width: 0;
+      height: 0;
+      overflow: hidden;
     }
     .holo-screen {
       position: relative;
@@ -785,6 +1074,327 @@
       0% { opacity: 0.1; }
       50% { opacity: 0.25; }
       100% { opacity: 0.1; }
+    }
+
+    .forge-popup-overlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(7, 6, 4, 0.7);
+      backdrop-filter: blur(14px) saturate(1.1);
+      -webkit-backdrop-filter: blur(14px) saturate(1.1);
+      z-index: 3000;
+    }
+    .forge-popup-overlay.active {
+      display: flex;
+    }
+    .forge-popup-shell {
+      position: absolute;
+      width: 80vw;
+      height: 80vh;
+      max-width: 1200px;
+      max-height: 840px;
+      opacity: 0;
+      transform: scale(0.98);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      z-index: 1;
+    }
+    .forge-popup-window {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(20, 12, 12, 0.92), rgba(10, 8, 8, 0.96));
+      border-radius: 8px;
+      border: 1px solid rgba(224, 71, 60, 0.45);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+    }
+    .forge-popup-holo {
+      position: absolute;
+      inset: 0;
+      border-radius: 8px;
+      border: 2px solid rgba(224, 71, 60, 0.6);
+      box-shadow:
+        0 0 30px rgba(224, 71, 60, 0.35),
+        inset 0 0 20px rgba(255, 140, 120, 0.12);
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(224, 71, 60, 0.08) 0px,
+        transparent 2px,
+        transparent 4px
+      );
+      opacity: 0.75;
+      pointer-events: none;
+    }
+    .forge-popup-shell.results-started .forge-popup-holo {
+      opacity: 0.28;
+      border-color: rgba(224, 71, 60, 0.4);
+      box-shadow:
+        0 0 18px rgba(224, 71, 60, 0.4),
+        inset 0 0 14px rgba(255, 140, 120, 0.12);
+      background: repeating-linear-gradient(
+        90deg,
+        rgba(224, 71, 60, 0.12) 0px,
+        transparent 8px,
+        transparent 18px
+      );
+      animation: holo-scan 5s linear infinite;
+    }
+    .forge-popup-content {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      padding: 28px 32px 36px;
+      text-align: center;
+      color: #f4c36b;
+      z-index: 2;
+    }
+    .forge-popup-title {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #ff8c82;
+      text-shadow:
+        0 4px 8px rgba(0, 0, 0, 0.98),
+        0 0 24px rgba(0, 0, 0, 0.9),
+        0 0 40px rgba(0, 0, 0, 0.75),
+        0 0 58px rgba(224, 71, 60, 0.4);
+      min-height: 28px;
+    }
+    .forge-popup-shell.complete .forge-popup-title {
+      font-size: 36px;
+      letter-spacing: 0.12em;
+      color: #ffd2c9;
+      text-shadow:
+        0 6px 12px rgba(0, 0, 0, 0.98),
+        0 0 30px rgba(0, 0, 0, 0.95),
+        0 0 48px rgba(0, 0, 0, 0.8),
+        0 0 70px rgba(224, 71, 60, 0.5);
+      transform: translateY(-20px);
+    }
+    .forge-popup-status {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+    }
+    .forge-popup-message {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #ffb3ab;
+      text-shadow:
+        0 4px 8px rgba(0, 0, 0, 0.98),
+        0 0 22px rgba(0, 0, 0, 0.9),
+        0 0 38px rgba(0, 0, 0, 0.75),
+        0 0 54px rgba(224, 71, 60, 0.35);
+      min-height: 26px;
+    }
+    .forge-popup-cogs {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      min-height: 110px;
+    }
+    .forge-cog {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background-color: rgba(8, 6, 3, 0.8);
+      border: 2px solid rgba(224, 71, 60, 0.35);
+      box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.6);
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      opacity: 0.85;
+      animation: forge-cog-spin 6s linear infinite;
+    }
+    #forgeCogLeft {
+      background-image: url('../../assets/loading/c2.png');
+    }
+    #forgeCogCenter {
+      background-image: url('../../assets/loading/c3.png');
+    }
+    #forgeCogRight {
+      background-image: url('../../assets/loading/c4.png');
+    }
+    .forge-cog.cog-mid {
+      width: 110px;
+      height: 110px;
+      animation-duration: 8s;
+    }
+    .forge-cog.cog-rev {
+      animation-direction: reverse;
+      animation-duration: 5s;
+    }
+    .forge-popup-results {
+      display: grid;
+      width: min(86%, 1100px);
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+    .forge-popup-thumb {
+      background: #050505;
+      border: 1px solid rgba(224, 71, 60, 0.35);
+      border-radius: 6px;
+      aspect-ratio: 16 / 9;
+      box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.8);
+      overflow: hidden;
+    }
+    .forge-popup-shell.complete .forge-popup-thumb {
+      box-shadow:
+        0 0 16px rgba(224, 71, 60, 0.35),
+        0 0 28px rgba(178, 28, 28, 0.4),
+        inset 0 0 18px rgba(0, 0, 0, 0.8);
+      border-color: rgba(224, 71, 60, 0.6);
+      animation: forge-thumb-pulse 1.8s ease-in-out infinite;
+    }
+    @keyframes forge-thumb-pulse {
+      0%, 100% {
+        box-shadow:
+          0 0 14px rgba(224, 71, 60, 0.3),
+          0 0 26px rgba(178, 28, 28, 0.35),
+          inset 0 0 18px rgba(0, 0, 0, 0.8);
+        border-color: rgba(224, 71, 60, 0.5);
+      }
+      50% {
+        box-shadow:
+          0 0 22px rgba(224, 71, 60, 0.55),
+          0 0 36px rgba(178, 28, 28, 0.55),
+          inset 0 0 18px rgba(0, 0, 0, 0.8);
+        border-color: rgba(224, 71, 60, 0.8);
+      }
+    }
+    .forge-popup-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
+    }
+    .forge-popup-thumb img:not([src=""]) {
+      display: block;
+    }
+    .forge-popup-shell.complete .forge-popup-status {
+      display: none;
+    }
+    .forge-popup-overlay.ready .forge-popup-shell {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .forge-holo-anim {
+      position: relative;
+      width: 60px;
+      height: 80px;
+      background: linear-gradient(135deg,
+        rgba(255, 140, 120, 0.12),
+        rgba(224, 71, 60, 0.2),
+        rgba(180, 40, 30, 0.1)
+      );
+      border: 2px solid rgba(224, 71, 60, 0.7);
+      border-radius: 4px;
+      box-shadow:
+        0 0 20px rgba(224, 71, 60, 0.4),
+        0 0 40px rgba(200, 40, 30, 0.3),
+        inset 0 0 20px rgba(255, 140, 120, 0.12);
+      opacity: 0;
+      z-index: 2;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .forge-holo-anim::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg,
+        transparent,
+        rgba(224, 71, 60, 0.35),
+        transparent
+      );
+      animation: holo-scan 3s linear infinite;
+    }
+    .forge-holo-anim::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(224, 71, 60, 0.12) 0px,
+        transparent 2px,
+        transparent 4px
+      );
+      animation: holo-lines 0.1s linear infinite;
+    }
+    .forge-holo-anim.animate {
+      animation: forge-holo-expand 1.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+      opacity: 1;
+    }
+    .forge-popup-overlay.ready .forge-holo-anim {
+      opacity: 0;
+      display: none;
+    }
+    @keyframes forge-holo-expand {
+      0% {
+        width: 60px;
+        height: 80px;
+        opacity: 0;
+        border-color: rgba(255, 180, 0, 0);
+        box-shadow: 0 0 0 rgba(255, 165, 0, 0);
+      }
+      20% {
+        opacity: 1;
+        border-color: rgba(224, 71, 60, 0.85);
+        box-shadow:
+          0 0 30px rgba(224, 71, 60, 0.6),
+          0 0 60px rgba(200, 40, 30, 0.4),
+          inset 0 0 30px rgba(255, 140, 120, 0.2);
+      }
+      100% {
+        width: 80vw;
+        height: 80vh;
+        opacity: 0.85;
+        border-color: rgba(224, 71, 60, 0.6);
+      }
+    }
+    .forge-popup-close {
+      position: absolute;
+      top: 16px;
+      right: 18px;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 1px solid rgba(224, 71, 60, 0.6);
+      background: rgba(12, 10, 10, 0.8);
+      color: #ffb3ab;
+      font-size: 18px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 0 12px rgba(224, 71, 60, 0.35);
+      z-index: 3;
+      pointer-events: auto;
+    }
+    .forge-popup-close:hover {
+      background: rgba(224, 71, 60, 0.2);
+      color: #fff;
+    }
+    @keyframes forge-cog-spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
     }
     
     /* Bottom controls */
@@ -893,15 +1503,16 @@
       bottom: 0;
       width: 100%;
       height: 100%;
-      background: radial-gradient(circle at 50% 100%,
-          rgba(255, 200, 0, 0.9) 0%,
-          rgba(255, 100, 0, 0.7) 20%,
-          rgba(255, 50, 0, 0.5) 40%,
-          rgba(200, 0, 0, 0.2) 60%,
-          transparent 80%);
+      background: radial-gradient(ellipse at 50% 100%,
+          rgba(255, 220, 140, 0.95) 0%,
+          rgba(255, 150, 70, 0.85) 25%,
+          rgba(255, 90, 30, 0.55) 50%,
+          rgba(160, 30, 10, 0.25) 70%,
+          transparent 90%);
       animation: flicker-flame 0.35s infinite alternate;
       transform-origin: bottom center;
-      opacity: 0.9;
+      opacity: 0.8;
+      filter: blur(6px);
     }
 
     .flame-core {
@@ -1030,20 +1641,67 @@
   </style>
 </head>
 <body>
+  <svg class="svg-filters" aria-hidden="true" focusable="false">
+    <filter id="forge-wavy" x="-40%" y="-40%" width="180%" height="180%" filterUnits="objectBoundingBox">
+      <feTurbulence id="forge-wavy-turbulence" type="turbulence" baseFrequency="0.01 0.02" numOctaves="1" seed="4" result="noise" />
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="50" xChannelSelector="R" yChannelSelector="G" result="displaced" />
+      <feGaussianBlur in="SourceAlpha" stdDeviation="6" result="alphaBlur" />
+      <feComposite in="displaced" in2="alphaBlur" operator="in" result="masked" />
+      <feFlood flood-color="rgb(178, 28, 28)" flood-opacity="0.3" result="tint" />
+      <feComposite in="tint" in2="masked" operator="in" result="tinted" />
+      <feBlend in="masked" in2="tinted" mode="screen" />
+      <animate xlink:href="#forge-wavy-turbulence" attributeName="baseFrequency" dur="60s" keyTimes="0;0.5;1"
+        values="0.01 0.02;0.02 0.04;0.01 0.02" repeatCount="indefinite" />
+    </filter>
+  </svg>
+  <div class="forge-popup-overlay" id="forgePopupOverlay" aria-hidden="true">
+    <div class="forge-popup-shell" id="forgePopupShell">
+      <div class="forge-popup-window"></div>
+      <div class="forge-popup-content">
+        <button class="forge-popup-close" id="forgePopupClose" aria-label="Cancel">×</button>
+        <div class="forge-popup-title" id="forgePopupTitle"></div>
+        <div class="forge-popup-status" id="forgePopupStatus">
+          <div class="forge-popup-cogs" id="forgePopupCogs">
+            <div class="forge-cog cog-rev" id="forgeCogLeft"></div>
+            <div class="forge-cog cog-mid" id="forgeCogCenter"></div>
+            <div class="forge-cog" id="forgeCogRight"></div>
+          </div>
+          <div class="forge-popup-message" id="forgePopupMessage"></div>
+        </div>
+        <div class="forge-popup-results" id="forgePopupResults">
+          <div class="forge-popup-thumb"><img id="forgeResult1" alt="Forge result 1"></div>
+          <div class="forge-popup-thumb"><img id="forgeResult2" alt="Forge result 2"></div>
+          <div class="forge-popup-thumb"><img id="forgeResult3" alt="Forge result 3"></div>
+        </div>
+      </div>
+      <div class="forge-popup-holo"></div>
+    </div>
+    <div class="forge-holo-anim" id="forgeHoloAnim"></div>
+  </div>
   <div class="page-background"></div>
   <header>
     <div class="nav">
-      <a href="home.html" class="brand">
+      <div class="brand">
         <div class="brand-icon">N</div>
         <span>NEUROFOUNDRY</span>
-      </a>
-      <div class="links">
+      </div>
+      <nav class="links">
         <a class="navlink" href="home.html">Home</a>
         <a class="navlink" href="forge_final.html">Forge</a>
-        <a class="navlink" href="projects.html">Projects</a>
-        <a class="navlink" href="technology.html">Technology</a>
+        <div class="nav-item dropdown">
+          <button class="dropdown-toggle" type="button">
+            Archives <span class="dropdown-caret">v</span>
+          </button>
+          <div class="dropdown-menu">
+            <a href="technology.html">Technology</a>
+            <a href="downloads.html">Downloads</a>
+            <a href="button2.html">Manifesto</a>
+            <a href="neurofoundry-report.html">Report</a>
+          </div>
+        </div>
+        <a class="navlink" href="about.html">About</a>
         <a class="btn primary" href="signup.html">Request Access</a>
-      </div>
+      </nav>
     </div>
   </header>
 
@@ -1104,10 +1762,7 @@
     <div class="media-viewer">
       <div class="media-container">
         <div class="media-content" id="mediaContent">
-          <div class="media-placeholder">
-            <div class="placeholder-icon">+</div>
-            <div class="placeholder-text">Render preview will appear here.</div>
-          </div>
+          <div class="media-placeholder"></div>
         </div>
       </div>
     </div>
@@ -1118,7 +1773,7 @@
       <div class="panels-container">
         <!-- Header with labels -->
         <div class="furnace-header">
-          <div class="header-label">Forge Preview</div>
+          <div class="header-label">The Forge - V.2</div>
           
         </div>
         
@@ -1132,7 +1787,7 @@
                 <div class="step-number">1</div>
                 <div class="panel-title">Origin</div>
               </div>
-              <p class="panel-description">The seed. Drop your starting frame here.</p>
+              <p class="panel-description">Upload an Image for analysis</p>
               <div class="upload-zone">
                 <div class="upload-icon">+</div>
                 <input type="file" id="originUpload" style="display: none;" accept="image/*">
@@ -1141,11 +1796,12 @@
 
             <!-- Fusion Panel -->
             <div class="panel">
-              <div class="panel-header">
-                <div class="step-number">2</div>
-                <div class="panel-title">Fusion</div>
-              </div>
-              <p class="panel-description">Blend elements. Subject + Scene + Style = Origin.</p>
+            <div class="panel-header">
+              <div class="step-number">2</div>
+              <div class="panel-title">Fusion</div>
+            </div>
+            <button type="button" class="fusion-clear" id="fusionClear" aria-label="Clear fusion">×</button>
+            <p class="panel-description">Or fuse them together.</p>
               
               <div class="fusion-grid" id="fusionGrid">
                 <div class="fusion-item" data-role="subject" id="fusionSubject" role="button" tabindex="0">
@@ -1160,7 +1816,7 @@
                   <input type="file" id="fusionSceneInput" accept="image/*">
                   <span class="fusion-check"></span>
                 </div>
-                <div class="fusion-item" data-role="style" id="fusionStyle" role="button" tabindex="0">
+                <div class="fusion-item is-locked" data-role="style" id="fusionStyle" role="button" tabindex="0" aria-disabled="true">
                   <div class="fusion-label">Style</div>
                   <div class="fusion-hint">Optional</div>
                   <input type="file" id="fusionStyleInput" accept="image/*">
@@ -1168,49 +1824,67 @@
                 </div>
               </div>
               <div class="fusion-status" id="fusionStatus">Waiting for subject + scene.</div>
-              <button class="generate-btn" disabled>Generate Image</button>
-              <button class="furnace-toggle-btn" id="furnace-toggle">Toggle Frame</button>
+              <div class="fusion-progress" aria-hidden="true">
+                <span class="fusion-progress-fill" id="fusionProgressFill"></span>
+              </div>
+              <input type="hidden" id="fusionSubjectOutputImage">
+              <input type="hidden" id="fusionSubjectOutputText">
+              <input type="hidden" id="fusionSceneOutputText">
+              <div class="panel-actions">
+                <button class="furnace-toggle-btn" id="furnace-toggle">Toggle Frame</button>
+                <button class="furnace-toggle-btn" id="sound-toggle" disabled>Toggle Sound</button>
+              </div>
             </div>
           </div>
 
           <!-- Right Panel: Assemble -->
-          <div class="panel right-panel">
-            <div class="panel-header">
-              <div class="step-number">3</div>
-              <div class="panel-title">Assemble</div>
+          <div class="right-panel-stack">
+            <div class="panel right-panel">
+              <div class="panel-header">
+                <div class="step-number">3</div>
+              <div class="panel-title">Synthesize</div>
+              </div>
+              <p class="panel-description">Define the vision. Style, context, and motion - woven into one.</p>
+              
+              <div class="input-group">
+                <label class="input-label">Style <span class="field-check" id="styleCheck"></span></label>
+                <select class="input-select" id="styleSelect" disabled>
+                  <option>Cinematic</option>
+                  <option>Documentary</option>
+                  <option>Artistic</option>
+                  <option>Dramatic</option>
+                </select>
+              </div>
+              
+              <div class="input-group">
+                <label class="input-label">Positive Prompt <span class="field-check" id="positiveCheck"></span></label>
+                <textarea class="input-field" id="positivePrompt" placeholder="Describe the subject..."></textarea>
+              </div>
+              
+              <div class="input-group">
+                <label class="input-label">Scene Prompt <span class="field-check" id="sceneCheck"></span></label>
+                <textarea class="input-field" id="scenePrompt" placeholder="Describe the scene..."></textarea>
+              </div>
+              
+              <div class="input-group">
+                <label class="input-label">Negative Prompt</label>
+                <textarea class="input-field" id="negativePrompt" placeholder="Avoid, exclude, or downplay..."></textarea>
+              </div>
+              
+              <button class="ai-generate-btn">Resynthesize</button>
+              <div class="synth-loading" id="synthLoading" aria-hidden="true">
+                <div class="synth-loading-card">
+                  <div class="synth-loading-text" id="synthLoadingText">Loading..</div>
+                  <div class="synth-loading-bar"><span class="synth-loading-fill"></span></div>
+                </div>
+              </div>
             </div>
-            <p class="panel-description">Define the vision. Style, context, and motion - woven into one.</p>
-            
-            <div class="input-group">
-              <label class="input-label">Style</label>
-              <select class="input-select" id="styleSelect">
-                <option>Cinematic</option>
-                <option>Documentary</option>
-                <option>Artistic</option>
-                <option>Dramatic</option>
-              </select>
+            <div class="render-btn is-disabled" role="button" tabindex="0" aria-label="Forge It" aria-disabled="true">
+              <img src="../../renderanvil.png" alt="Forge It">
             </div>
-            
-            <div class="input-group">
-              <label class="input-label">Positive Prompt</label>
-              <textarea class="input-field" id="positivePrompt" placeholder="Describe the subject...">A fantasy creature in its habitat</textarea>
-            </div>
-            
-            <div class="input-group">
-              <label class="input-label">Scene Prompt</label>
-              <textarea class="input-field" id="scenePrompt" placeholder="Describe the scene...">A mystical forest with glow</textarea>
-            </div>
-            
-            <div class="input-group">
-              <label class="input-label">Negative Prompt</label>
-              <textarea class="input-field" id="negativePrompt" placeholder="Avoid, exclude, or downplay...">A majestic dragon soaring over a mystical forest at dawn.</textarea>
-            </div>
-            
-            <button class="ai-generate-btn">Let AI Compose</button>
-            
-            <button class="render-btn">FORGE IT</button>
           </div>
         </div>
+        
       </div>
       
       <!-- Bottom controls -->
@@ -1316,7 +1990,15 @@
       createFireParticles(document.querySelector('.fire-right'));
     })();
 
-      const REMBG_API = 'https://nfcr-extractor.onrender.com/extract';
+      const IS_LOCAL = location.hostname === 'localhost'
+        || location.hostname === '127.0.0.1'
+        || location.protocol === 'file:';
+      const REMBG_API = IS_LOCAL
+        ? 'http://127.0.0.1:5001/extract'
+        : 'https://nfcr-extractor.onrender.com/extract';
+      const REMBG_HEALTH = IS_LOCAL
+        ? 'http://127.0.0.1:5001/health'
+        : 'https://nfcr-extractor.onrender.com/health';
       const CAPTION_API = 'https://nfcr-synthesize.onrender.com/features/4/caption';
       const RENDER_API = 'https://nfcr-synthesize.onrender.com/features/4/render';
       const FUSION_API = 'https://prmptrndr.csirico9.workers.dev/fusion';
@@ -1333,6 +2015,13 @@
       const fusionSubject = document.getElementById('fusionSubject');
       const fusionScene = document.getElementById('fusionScene');
       const fusionStyle = document.getElementById('fusionStyle');
+      const fusionClear = document.getElementById('fusionClear');
+      const fusionProgressFill = document.getElementById('fusionProgressFill');
+      const furnaceToggle = document.getElementById('furnace-toggle');
+      const furnaceFront = document.querySelector('.furnace-front');
+      const fusionSubjectOutputImage = document.getElementById('fusionSubjectOutputImage');
+      const fusionSubjectOutputText = document.getElementById('fusionSubjectOutputText');
+      const fusionSceneOutputText = document.getElementById('fusionSceneOutputText');
       const generateBtn = document.querySelector('.generate-btn');
       const renderBtn = document.querySelector('.render-btn');
       const mediaViewer = document.querySelector('.media-viewer');
@@ -1340,14 +2029,41 @@
       const statusEl = document.getElementById('forgeStatus');
       const recentContainer = document.querySelector('.craft-items');
       const styleSelect = document.getElementById('styleSelect');
+      const styleCheck = document.getElementById('styleCheck');
       const positivePrompt = document.getElementById('positivePrompt');
+      const positiveCheck = document.getElementById('positiveCheck');
       const scenePrompt = document.getElementById('scenePrompt');
+      const sceneCheck = document.getElementById('sceneCheck');
       const negativePrompt = document.getElementById('negativePrompt');
+      const resynthesizeBtn = document.querySelector('.ai-generate-btn');
+      const synthLoading = document.getElementById('synthLoading');
+      const forgePopupOverlay = document.getElementById('forgePopupOverlay');
+      const forgePopupShell = document.getElementById('forgePopupShell');
+      const forgeHoloAnim = document.getElementById('forgeHoloAnim');
+      const forgePopupTitle = document.getElementById('forgePopupTitle');
+      const forgePopupMessage = document.getElementById('forgePopupMessage');
+      const forgePopupResults = document.getElementById('forgePopupResults');
+      const forgeResult1 = document.getElementById('forgeResult1');
+      const forgeResult2 = document.getElementById('forgeResult2');
+      const forgeResult3 = document.getElementById('forgeResult3');
+      const forgePopupClose = document.getElementById('forgePopupClose');
 
       const RECENT_KEY = 'forgeRecentRenders';
       const MAX_RECENT = 16;
       const AUTO_DOWNLOAD = true;
       const EXTRACT_TIMEOUT_MS = 45000;
+      const FORGE_HOLO_ANIM_MS = 1400;
+      const FORGE_MESSAGE_INTERVAL_MS = 2400;
+      const RENDER_TIMEOUT_MS = 60000;
+      const RENDER_MAX_ATTEMPTS = 3;
+      const forgeMessages = [
+        'Igniting the Forge...',
+        'Initiating Thermal Transference...',
+        'Accelerating Composite Fusion...',
+        'Regulating Convergence...',
+        'Analyzing the Artifacts...'
+      ];
+      let recentCache = [];
 
       let originImage = null;
       let subjectImage = null;
@@ -1358,8 +2074,14 @@
       let acpContext = null;
       let sipContext = null;
       let mergedImage = null;
+      let synthCaption = null;
       let isProcessing = false;
       let isExtracting = false;
+      let isResynthesizing = false;
+      let forgePopupTimer = null;
+      let forgeMessageTimer = null;
+      let forgeMessageIndex = 0;
+      let forgeCancelled = false;
 
       function setStatus(message, level) {
         if (!statusEl) return;
@@ -1380,53 +2102,192 @@
         updateRenderState();
       }
 
+      function setSynthesizeLoading(active) {
+        if (!synthLoading) return;
+        synthLoading.classList.toggle('active', active);
+        synthLoading.setAttribute('aria-hidden', (!active).toString());
+      }
+
+      function maybeAutoFusion() {
+        if (isProcessing) return;
+        const ready = extractedSubject && cdpContext && backgroundImage && acpContext;
+        if (!ready) return;
+        runFusionPipeline();
+      }
+
       function updateRenderState() {
         if (renderBtn) {
-          if (isProcessing) {
-            renderBtn.disabled = true;
-          } else if (originImage) {
-            renderBtn.disabled = false;
-          } else {
-            renderBtn.disabled = !(mergedImage && cdpContext && acpContext && sipContext);
-          }
+          const step3Ready = hasAllPromptChecks();
+          const step1Or2Ready = hasOriginOrFusionReady();
+          const ready = step1Or2Ready && step3Ready && !isProcessing;
+          renderBtn.classList.toggle('ready', ready);
+          renderBtn.classList.toggle('is-disabled', !ready);
+          renderBtn.setAttribute('aria-disabled', (!ready).toString());
+        }
+        if (resynthesizeBtn) {
+          const step3Ready = hasAllPromptChecks();
+          const step2Ready = hasFusionChecks();
+          resynthesizeBtn.disabled = isProcessing || !(step2Ready && step3Ready);
         }
         updateFusionChecklist();
       }
 
+      function updateFusionClear() {
+        if (!fusionClear) return;
+        const hasFusionAssets = !!(subjectImage || backgroundImage || styleImage || extractedSubject || mergedImage);
+        fusionClear.classList.toggle('visible', hasFusionAssets);
+      }
+
+      function updateFusionProgress() {
+        if (!fusionProgressFill) return;
+        const total = 3;
+        const done =
+          (fusionSubject && fusionSubject.classList.contains('has-image') ? 1 : 0) +
+          (fusionScene && fusionScene.classList.contains('has-image') ? 1 : 0) +
+          (fusionStyle && fusionStyle.classList.contains('has-image') ? 1 : 0);
+        const percent = Math.round((done / total) * 100);
+        fusionProgressFill.style.width = `${percent}%`;
+      }
+
       function updateFusionChecklist() {
+        updateFusionProgress();
         if (!generateBtn) return;
-        const ready = !!(subjectImage && backgroundImage);
+        const ready = hasFusionChecks();
         generateBtn.disabled = !ready || isProcessing || !!originImage;
       }
 
-      function displayImage(imageSrc) {
+      function triggerForgePopup() {
+        if (!forgePopupOverlay || !forgeHoloAnim) return;
+        forgeCancelled = false;
+        forgePopupOverlay.classList.add('active');
+        forgePopupOverlay.classList.remove('ready');
+        forgePopupOverlay.setAttribute('aria-hidden', 'false');
+        if (forgePopupShell) {
+          forgePopupShell.classList.remove('complete', 'results-started');
+        }
+        if (forgePopupTitle) {
+          forgePopupTitle.textContent = '';
+        }
+        if (forgePopupMessage) {
+          forgePopupMessage.textContent = '';
+        }
+        if (forgeResult1) forgeResult1.src = '';
+        if (forgeResult2) forgeResult2.src = '';
+        if (forgeResult3) forgeResult3.src = '';
+        forgeHoloAnim.classList.remove('animate');
+        void forgeHoloAnim.offsetWidth;
+        forgeHoloAnim.classList.add('animate');
+        if (forgePopupTimer) {
+          clearTimeout(forgePopupTimer);
+        }
+        forgePopupTimer = setTimeout(() => {
+          forgePopupOverlay.classList.add('ready');
+          startForgeMessageLoop();
+        }, FORGE_HOLO_ANIM_MS);
+      }
+
+      function startForgeMessageLoop() {
+        if (!forgePopupMessage) return;
+        if (!forgeMessages || forgeMessages.length === 0) {
+          forgePopupMessage.textContent = '';
+          return;
+        }
+        forgeMessageIndex = 0;
+        forgePopupMessage.textContent = forgeMessages[forgeMessageIndex];
+        if (forgeMessageTimer) {
+          clearInterval(forgeMessageTimer);
+        }
+        forgeMessageTimer = setInterval(() => {
+          forgeMessageIndex = (forgeMessageIndex + 1) % forgeMessages.length;
+          forgePopupMessage.textContent = forgeMessages[forgeMessageIndex];
+        }, FORGE_MESSAGE_INTERVAL_MS);
+      }
+
+      function stopForgeMessageLoop() {
+        if (forgeMessageTimer) {
+          clearInterval(forgeMessageTimer);
+          forgeMessageTimer = null;
+        }
+      }
+
+      function cancelForgePopup() {
+        forgeCancelled = true;
+        stopForgeMessageLoop();
+        if (forgePopupOverlay) {
+          forgePopupOverlay.classList.remove('active', 'ready');
+          forgePopupOverlay.setAttribute('aria-hidden', 'true');
+        }
+        if (forgePopupShell) {
+          forgePopupShell.classList.remove('complete', 'results-started');
+        }
+        if (forgeHoloAnim) {
+          forgeHoloAnim.classList.remove('animate');
+        }
+        setProcessing(false);
+        setStatus('Forge cancelled.', 'error');
+      }
+
+      function showForgeComplete(images) {
+        if (!forgePopupShell || !forgePopupTitle) return;
+        if (forgeCancelled) return;
+        if (!images || images.length < 3) return;
+        forgePopupShell.classList.add('complete');
+        forgePopupTitle.textContent = 'Omnisynthesis: Complete';
+        stopForgeMessageLoop();
+        if (forgeResult1) forgeResult1.src = images[0] || '';
+        if (forgeResult2) forgeResult2.src = images[1] || '';
+        if (forgeResult3) forgeResult3.src = images[2] || '';
+        renderRecent(recentCache);
+      }
+
+      function updateForgeResultSlot(slot, dataUrl) {
+        if (!dataUrl) return;
+        const targets = [forgeResult1, forgeResult2, forgeResult3];
+        const target = targets[slot - 1];
+        if (target) {
+          target.src = dataUrl;
+        }
+        if (forgePopupShell) {
+          forgePopupShell.classList.add('results-started');
+        }
+      }
+
+      function displayImage(imageSrc, useDegen) {
         if (!mediaContent) return;
+        if (mediaViewer) {
+          mediaViewer.classList.toggle('degen-active', !!useDegen);
+        }
         mediaContent.innerHTML = `<img src="${imageSrc}" alt="Render" />`;
       }
 
       function showPlaceholder() {
         if (!mediaContent) return;
+        if (mediaViewer) {
+          mediaViewer.classList.remove('degen-active');
+        }
         mediaContent.innerHTML = `
-          <div class="media-placeholder">
-            <div class="placeholder-icon">+</div>
-            <div class="placeholder-text">Render preview will appear here.</div>
-          </div>
+          <div class="media-placeholder"></div>
         `;
       }
 
-      function updateUploadZoneLabel(name) {
+      function updateUploadZoneLabel(name, previewSrc) {
         if (!uploadZone) return;
-        if (!name) {
+        if (!previewSrc) {
+          uploadZone.classList.remove('has-origin');
           uploadZone.innerHTML = `
             <div class="upload-icon">+</div>
             <div style="font-size: 9px; color: #9aa3ad; margin-top: 4px;">Drop image</div>
           `;
-          return;
+        } else {
+          uploadZone.classList.add('has-origin');
+          uploadZone.innerHTML = `
+            <img class="origin-preview" src="${previewSrc}" alt="${name || 'Origin image'}">
+            <button type="button" class="origin-clear" aria-label="Clear origin">x</button>
+          `;
         }
-        uploadZone.innerHTML = `
-          <div class="upload-icon">+</div>
-          <div style="font-size: 9px; color: #9aa3ad; margin-top: 4px;">${name}</div>
-        `;
+        if (originInput && !uploadZone.contains(originInput)) {
+          uploadZone.appendChild(originInput);
+        }
       }
 
       function readFile(file) {
@@ -1448,19 +2309,88 @@
         }
       }
 
-      function setFusionImage(el, dataUrl) {
+      function setFusionPreview(el, dataUrl) {
+        if (!el) return;
+        el.classList.remove('has-image');
+        el.style.backgroundImage = `url(${dataUrl})`;
+        el.style.backgroundSize = 'cover';
+        el.style.backgroundPosition = 'center';
+      }
+
+      function markFusionReady(el) {
         if (!el) return;
         el.classList.add('has-image');
-        el.style.backgroundImage = `url(${dataUrl})`;
       }
 
       function clearFusionImage(el) {
         if (!el) return;
         el.classList.remove('has-image');
         el.style.backgroundImage = '';
+        el.style.backgroundSize = '';
+        el.style.backgroundPosition = '';
+      }
+
+      function setHiddenValue(el, value) {
+        if (!el) return;
+        el.value = value || '';
+      }
+
+      function setFieldCheck(el, isReady) {
+        if (!el) return;
+        el.classList.toggle('active', !!isReady);
+      }
+
+      function updatePromptChecks() {
+        if (isResynthesizing) {
+          setFieldCheck(styleCheck, false);
+          setFieldCheck(positiveCheck, false);
+          setFieldCheck(sceneCheck, false);
+          updateRenderState();
+          return;
+        }
+        setFieldCheck(styleCheck, !!(styleSelect && styleSelect.value));
+        setFieldCheck(positiveCheck, !!(positivePrompt && positivePrompt.value.trim()));
+        setFieldCheck(sceneCheck, !!(scenePrompt && scenePrompt.value.trim()));
+        updateRenderState();
+      }
+
+      function hasAllPromptChecks() {
+        return !!(
+          styleCheck &&
+          positiveCheck &&
+          sceneCheck &&
+          styleCheck.classList.contains('active') &&
+          positiveCheck.classList.contains('active') &&
+          sceneCheck.classList.contains('active')
+        );
+      }
+
+      function hasFusionChecks() {
+        return !!(
+          fusionSubject &&
+          fusionScene &&
+          fusionStyle &&
+          fusionSubject.classList.contains('has-image') &&
+          fusionScene.classList.contains('has-image') &&
+          fusionStyle.classList.contains('has-image')
+        );
+      }
+
+      function hasOriginOrFusionReady() {
+        return !!(originImage || hasFusionChecks());
+      }
+
+      function stashSubjectOutput() {
+        setHiddenValue(fusionSubjectOutputImage, extractedSubject);
+        setHiddenValue(fusionSubjectOutputText, cdpContext);
+      }
+
+      function stashSceneOutput() {
+        setHiddenValue(fusionSceneOutputText, acpContext);
       }
 
       function resetFusionState() {
+        const prevSip = sipContext;
         subjectImage = null;
         backgroundImage = null;
         styleImage = null;
@@ -1469,11 +2399,26 @@
         acpContext = null;
         sipContext = null;
         mergedImage = null;
+        if (positivePrompt && synthCaption && positivePrompt.value === synthCaption) {
+          positivePrompt.value = '';
+        }
+        if (scenePrompt && prevSip && scenePrompt.value === prevSip) {
+          scenePrompt.value = '';
+        }
+        synthCaption = null;
         clearFusionImage(fusionSubject);
         clearFusionImage(fusionScene);
         clearFusionImage(fusionStyle);
+        setHiddenValue(fusionSubjectOutputImage, '');
+        setHiddenValue(fusionSubjectOutputText, '');
+        setHiddenValue(fusionSceneOutputText, '');
+        if (fusionSubjectInput) fusionSubjectInput.value = '';
+        if (fusionSceneInput) fusionSceneInput.value = '';
+        if (fusionStyleInput) fusionStyleInput.value = '';
         setFusionStatus('Waiting for subject + scene.');
         updateRenderState();
+        updatePromptChecks();
+        updateFusionClear();
       }
 
       function enableFusion(enabled) {
@@ -1487,11 +2432,18 @@
         showPlaceholder();
       }
 
+      function clearOriginAndReset() {
+        clearOrigin();
+        enableFusion(true);
+        resetFusionState();
+      }
+
       async function handleOriginFile(file) {
         if (!file) return;
         const dataUrl = await readFile(file);
         originImage = dataUrl;
-        displayImage(dataUrl);
+        displayImage(dataUrl, false);
+        updateUploadZoneLabel(file.name, dataUrl);
         enableFusion(false);
         resetFusionState();
         setFusionStatus('Fusion disabled. Origin image loaded.');
@@ -1507,30 +2459,68 @@
           enableFusion(true);
         }
         if (role === 'subject') {
+          const prevSip = sipContext;
           extractedSubject = null;
           cdpContext = null;
           sipContext = null;
           mergedImage = null;
+          styleImage = null;
+          if (positivePrompt && synthCaption && positivePrompt.value === synthCaption) {
+            positivePrompt.value = '';
+          }
+          if (scenePrompt && prevSip && scenePrompt.value === prevSip) {
+            scenePrompt.value = '';
+          }
+          synthCaption = null;
           subjectImage = dataUrl;
-          setFusionImage(fusionSubject, dataUrl);
+          setFusionPreview(fusionSubject, dataUrl);
+          updateFusionClear();
+          clearFusionImage(fusionStyle);
+          setHiddenValue(fusionSubjectOutputImage, '');
+          setHiddenValue(fusionSubjectOutputText, '');
+          updatePromptChecks();
+          updateRenderState();
           await extractSubject();
           return;
         } else if (role === 'scene') {
+          const prevSip = sipContext;
           backgroundImage = dataUrl;
-          setFusionImage(fusionScene, dataUrl);
+          setFusionPreview(fusionScene, dataUrl);
+          updateFusionClear();
+          styleImage = null;
+          clearFusionImage(fusionStyle);
+          if (positivePrompt && synthCaption && positivePrompt.value === synthCaption) {
+            positivePrompt.value = '';
+          }
+          if (scenePrompt && prevSip && scenePrompt.value === prevSip) {
+            scenePrompt.value = '';
+          }
+          synthCaption = null;
+          setHiddenValue(fusionSceneOutputText, '');
+          updatePromptChecks();
+          updateRenderState();
+          await processScene();
+          return;
         } else if (role === 'style') {
           styleImage = dataUrl;
-          setFusionImage(fusionStyle, dataUrl);
+          setFusionPreview(fusionStyle, dataUrl);
+          updateFusionClear();
+          return;
         }
-        if (extractedSubject && backgroundImage) {
-          await runFusionPipeline();
-        } else {
-          setFusionStatus('Waiting for subject + scene.');
-        }
+        setFusionStatus('Waiting for subject + scene.');
       }
 
       if (uploadZone && originInput) {
-        uploadZone.addEventListener('click', () => originInput.click());
+        uploadZone.addEventListener('click', (e) => {
+          const clearBtn = e.target.closest('.origin-clear');
+          if (clearBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            clearOriginAndReset();
+            return;
+          }
+          originInput.click();
+        });
         uploadZone.addEventListener('dragover', (e) => {
           e.preventDefault();
           uploadZone.style.borderColor = '#e0473c';
@@ -1553,6 +2543,7 @@
 
       function bindFusionInput(item, input, role) {
         if (!item || !input) return;
+        if (item.classList.contains('is-locked')) return;
         item.addEventListener('click', () => {
           input.click();
         });
@@ -1582,6 +2573,30 @@
       bindFusionInput(fusionSubject, fusionSubjectInput, 'subject');
       bindFusionInput(fusionScene, fusionSceneInput, 'scene');
       bindFusionInput(fusionStyle, fusionStyleInput, 'style');
+
+      if (fusionClear) {
+        fusionClear.addEventListener('click', (event) => {
+          event.preventDefault();
+          resetFusionState();
+        });
+      }
+
+      if (furnaceToggle && furnaceFront) {
+        furnaceToggle.addEventListener('click', () => {
+          furnaceFront.classList.toggle('is-hidden');
+        });
+      }
+
+      if (styleSelect) {
+        updatePromptChecks();
+        styleSelect.addEventListener('change', updatePromptChecks);
+      }
+      if (positivePrompt) {
+        positivePrompt.addEventListener('input', updatePromptChecks);
+      }
+      if (scenePrompt) {
+        scenePrompt.addEventListener('input', updatePromptChecks);
+      }
 
       const SIP_INSTRUCTION = `TASK: Identify the visual style of this image.
 
@@ -1677,15 +2692,35 @@ ${combined}`;
             cdpContext = '';
             setFusionStatus('CDP failed. Extraction ok.');
           }
-          if (backgroundImage) {
-            setFusionStatus('Subject extracted. Continuing fusion.');
-            await runFusionPipeline();
-          } else {
-            setFusionStatus('Subject extracted. Add scene.');
+          stashSubjectOutput();
+          if (extractedSubject && cdpContext) {
+            markFusionReady(fusionSubject);
           }
+          setFusionStatus('Subject extracted.');
+          updateRenderState();
+          maybeAutoFusion();
         } finally {
           isExtracting = false;
         }
+      }
+
+      async function processScene() {
+        if (!backgroundImage) return;
+        setFusionStatus('Analyzing scene...');
+        try {
+          acpContext = await runAcp(backgroundImage);
+          setFusionStatus('Scene analyzed.');
+        } catch (err) {
+          console.error(err);
+          acpContext = '';
+          setFusionStatus('Scene analysis failed.');
+        }
+        stashSceneOutput();
+        if (acpContext) {
+          markFusionReady(fusionScene);
+        }
+        updateRenderState();
+        maybeAutoFusion();
       }
 
       async function mergeImages() {
@@ -1717,25 +2752,50 @@ ${combined}`;
         if (isProcessing) return;
         if (!subjectImage || !backgroundImage) return;
         setProcessing(true);
+        setSynthesizeLoading(true);
         try {
           if (!extractedSubject) {
             await extractSubject();
           }
-          try {
-            acpContext = await runAcp(backgroundImage);
-          } catch (err) {
-            console.error(err);
-            acpContext = '';
-            setFusionStatus('ACP failed. Continuing...');
+          if (!acpContext) {
+            try {
+              acpContext = await runAcp(backgroundImage);
+            } catch (err) {
+              console.error(err);
+              acpContext = '';
+              setFusionStatus('ACP failed. Continuing...');
+            }
+            stashSceneOutput();
+            if (acpContext) {
+              markFusionReady(fusionScene);
+            }
           }
           mergedImage = await mergeImages();
-          displayImage(mergedImage);
+          displayImage(mergedImage, true);
+          styleImage = mergedImage;
+          setFusionPreview(fusionStyle, mergedImage);
+          markFusionReady(fusionStyle);
           try {
             sipContext = await runSip(mergedImage);
           } catch (err) {
             console.error(err);
             sipContext = '';
             setFusionStatus('SIP failed. Continuing...');
+          }
+          if (scenePrompt && sipContext) {
+            scenePrompt.value = sipContext;
+          }
+          updatePromptChecks();
+          if (cdpContext && acpContext && sipContext) {
+            try {
+              synthCaption = await runSynth(cdpContext, acpContext, sipContext);
+              if (positivePrompt && synthCaption) {
+                positivePrompt.value = synthCaption;
+              }
+              updatePromptChecks();
+            } catch (err) {
+              console.error(err);
+            }
           }
           setFusionStatus('Fusion ready.');
           setStatus('Fusion ready. Press Forge.', 'success');
@@ -1745,6 +2805,7 @@ ${combined}`;
           setStatus(`Fusion failed: ${err.message}`, 'error');
         } finally {
           setProcessing(false);
+          setSynthesizeLoading(false);
         }
       }
 
@@ -1772,11 +2833,17 @@ ${combined}`;
       }
 
       function saveRender(dataUrl) {
-        const renders = getRecentRenders();
-        renders.unshift(dataUrl);
-        const trimmed = renders.slice(0, MAX_RECENT);
-        localStorage.setItem(RECENT_KEY, JSON.stringify(trimmed));
-        renderRecent();
+        if (!recentCache.length) {
+          recentCache = getRecentRenders();
+        }
+        recentCache.unshift(dataUrl);
+        recentCache = recentCache.slice(0, MAX_RECENT);
+        try {
+          localStorage.setItem(RECENT_KEY, JSON.stringify(recentCache));
+        } catch (err) {
+          console.error('Recent save failed', err);
+        }
+        renderRecent(recentCache);
       }
 
       function downloadImage(dataUrl, filename) {
@@ -1788,10 +2855,10 @@ ${combined}`;
         link.remove();
       }
 
-      function renderRecent() {
+      function renderRecent(rendersOverride) {
         if (!recentContainer) return;
         const items = recentContainer.querySelectorAll('.craft-item');
-        const renders = getRecentRenders();
+        const renders = rendersOverride || recentCache || getRecentRenders();
         items.forEach((item, idx) => {
           const render = renders[idx];
           if (render) {
@@ -1810,7 +2877,7 @@ ${combined}`;
           if (!target) return;
           const src = target.dataset.src;
           if (!src) return;
-          displayImage(src);
+          displayImage(src, false);
         });
       }
 
@@ -1818,58 +2885,135 @@ ${combined}`;
         const outputs = [];
         const renderCount = 3;
         for (let i = 1; i <= renderCount; i++) {
-          setStatus(`Rendering ${i}/${renderCount}...`, 'active');
-          const response = await fetch(RENDER_API, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              method: 'prompt',
-              prompt: promptText,
-              negative_prompt: negativeText,
-              model: '@cf/stabilityai/stable-diffusion-xl-base-1.0',
-              width: 1024,
-              height: 576,
-              guidance_scale: 7.5,
-              num_inference_steps: 25
-            })
-          });
-          if (!response.ok) throw new Error(`Render ${i} failed: ${response.status}`);
-          const data = await response.json();
-          if (data.ok && data.image_base64) {
-            const dataUrl = `data:image/png;base64,${data.image_base64}`;
-            outputs.push(dataUrl);
-            displayImage(dataUrl);
-            saveRender(dataUrl);
-            if (AUTO_DOWNLOAD) {
-              downloadImage(dataUrl, `forge_render_${Date.now()}_${i}.png`);
+          if (forgeCancelled) break;
+          let success = false;
+          for (let attempt = 1; attempt <= RENDER_MAX_ATTEMPTS; attempt++) {
+            if (forgeCancelled) break;
+            setStatus(`Rendering ${i}/${renderCount}...`, 'active');
+            try {
+              const response = await fetchWithTimeout(RENDER_API, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  method: 'prompt',
+                  prompt: promptText,
+                  negative_prompt: negativeText,
+                  model: '@cf/stabilityai/stable-diffusion-xl-base-1.0',
+                  width: 1024,
+                  height: 576,
+                  guidance_scale: 7.5,
+                  num_inference_steps: 25
+                })
+              }, RENDER_TIMEOUT_MS);
+              if (!response.ok) {
+                throw new Error(`Render ${i} failed: ${response.status}`);
+              }
+              const data = await response.json();
+              if (data.ok && data.image_base64) {
+                const dataUrl = `data:image/png;base64,${data.image_base64}`;
+                outputs.push(dataUrl);
+                updateForgeResultSlot(outputs.length, dataUrl);
+                displayImage(dataUrl, false);
+                saveRender(dataUrl);
+                if (AUTO_DOWNLOAD) {
+                  downloadImage(dataUrl, `forge_render_${Date.now()}_${i}.png`);
+                }
+                success = true;
+                break;
+              }
+              throw new Error(`Render ${i} returned empty output`);
+            } catch (err) {
+              console.error(err);
+              setStatus(`Render ${i} retry ${attempt}/${RENDER_MAX_ATTEMPTS}`, 'error');
             }
           }
+          if (!success) {
+            setStatus(`Render ${i} failed.`, 'error');
+            break;
+          }
+        }
+        if (!forgeCancelled && outputs.length === renderCount) {
+          showForgeComplete(outputs);
         }
         return outputs;
       }
 
       if (renderBtn) {
         renderBtn.addEventListener('click', async () => {
-          if (isProcessing) return;
+          if (isProcessing || renderBtn.classList.contains('is-disabled')) return;
+          const step3Ready = hasAllPromptChecks();
+          const step1Or2Ready = hasOriginOrFusionReady();
+          if (!step3Ready || !step1Or2Ready) return;
+          triggerForgePopup();
           setProcessing(true);
           try {
             let basePrompt = '';
-            if (!originImage) {
-              if (!mergedImage || !cdpContext || !acpContext || !sipContext) {
-                throw new Error('Fusion not ready. Add subject and scene first.');
-              }
-              basePrompt = await runSynth(cdpContext, acpContext, sipContext);
+          if (!originImage) {
+            if (!mergedImage || !cdpContext || !acpContext || !sipContext) {
+              throw new Error('Fusion not ready. Add subject and scene first.');
             }
+            if (!synthCaption) {
+              synthCaption = await runSynth(cdpContext, acpContext, sipContext);
+            }
+            basePrompt = synthCaption || '';
+            if (positivePrompt && basePrompt) {
+              positivePrompt.value = basePrompt;
+            }
+            updatePromptChecks();
+          }
             const promptText = buildPrompt(basePrompt);
             const negativeText = getNegativePrompt();
             await renderImages(promptText, negativeText);
             setStatus('Render complete.', 'success');
           } catch (err) {
             setStatus(`Render failed: ${err.message}`, 'error');
+            cancelForgePopup();
           } finally {
-            setProcessing(false);
+            if (!forgeCancelled) {
+              setProcessing(false);
+            }
           }
         });
+        renderBtn.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            renderBtn.click();
+          }
+        });
+      }
+
+      if (resynthesizeBtn) {
+        resynthesizeBtn.addEventListener('click', async () => {
+          if (isProcessing || resynthesizeBtn.disabled) return;
+          const step3Ready = hasAllPromptChecks();
+          const step2Ready = hasFusionChecks();
+          if (!step3Ready || !step2Ready) return;
+          if (!cdpContext || !acpContext || !sipContext) {
+            setStatus('Fusion captions not ready. Upload subject + scene first.', 'error');
+            return;
+          }
+          try {
+            isResynthesizing = true;
+            setSynthesizeLoading(true);
+            updatePromptChecks();
+            setStatus('Resynthesizing caption...', 'active');
+            synthCaption = await runSynth(cdpContext, acpContext, sipContext);
+            if (positivePrompt && synthCaption) {
+              positivePrompt.value = synthCaption;
+            }
+            setStatus('Caption resynthesized.', 'success');
+          } catch (err) {
+            setStatus(`Resynthesize failed: ${err.message}`, 'error');
+          } finally {
+            isResynthesizing = false;
+            setSynthesizeLoading(false);
+            updatePromptChecks();
+          }
+        });
+      }
+
+      if (forgePopupClose) {
+        forgePopupClose.addEventListener('click', cancelForgePopup);
       }
 
       if (generateBtn) {
@@ -1880,10 +3024,12 @@ ${combined}`;
       }
 
       window.addEventListener('load', async () => {
-        renderRecent();
+        recentCache = getRecentRenders();
+        renderRecent(recentCache);
         updateUploadZoneLabel('');
+        updateRenderState();
         try {
-          await fetch('https://nfcr-extractor.onrender.com/health');
+          await fetch(REMBG_HEALTH);
           await fetch('https://nfcr-synthesize.onrender.com/features/4/images');
         } catch (error) {
           setStatus('Services not detected. Render may fail.', 'error');

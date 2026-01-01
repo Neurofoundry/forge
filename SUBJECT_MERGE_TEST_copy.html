@@ -223,7 +223,15 @@
   </div>
 
   <script>
-    const REMBG_API = 'https://nfcr-extractor.onrender.com/extract';
+    const IS_LOCAL = location.hostname === 'localhost'
+      || location.hostname === '127.0.0.1'
+      || location.protocol === 'file:';
+    const REMBG_API = IS_LOCAL
+      ? 'http://127.0.0.1:5001/extract'
+      : 'https://nfcr-extractor.onrender.com/extract';
+    const REMBG_HEALTH = IS_LOCAL
+      ? 'http://127.0.0.1:5001/health'
+      : 'https://nfcr-extractor.onrender.com/health';
     const CAPTION_API = 'https://nfcr-synthesize.onrender.com/features/4/caption';
     const RENDER_API = 'https://nfcr-synthesize.onrender.com/features/4/render';
     // Base URL for Cloudflare fusion endpoints. These endpoints handle
@@ -231,6 +239,8 @@
     const FUSION_API = 'https://prmptrndr.csirico9.workers.dev/fusion';
     // Use the dedicated synth worker with GPT-OSS-120B
     const SYNTH_API = 'https://synth.csirico9.workers.dev';
+    const FUSION_TIMEOUT_MS = 45000;
+    const SYNTH_TIMEOUT_MS = 45000;
 
     // Instruction file URLs (set these to the online text files that contain
     // specific instructions for each caption step)
@@ -252,6 +262,16 @@
       }
     }
 
+    async function fetchWithTimeout(url, options, timeoutMs) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        return await fetch(url, { ...options, signal: controller.signal });
+      } finally {
+        clearTimeout(timeoutId);
+      }
+    }
+
     let subjectImage = null;
     let backgroundImage = null;
     let extractedSubject = null;
@@ -263,6 +283,13 @@
     let mergedImage = null;
     let fullAnalysis = null;
     let isProcessing = false;
+    let pipelineError = null;
+
+    function setPipelineError(message) {
+      pipelineError = message || 'Pipeline failed';
+      showStatus(pipelineError, 'error');
+      document.getElementById('processBtn').disabled = true;
+    }
 
     // -----------------------------------------------------------------
     // Helper functions to communicate with the Cloudflare fusion worker. Each
@@ -272,32 +299,42 @@
 
     async function runCdp(imageData) {
       // Send the extracted subject image to the CDP worker endpoint
-      const response = await fetch(`${FUSION_API}/cdp`, {
+      const response = await fetchWithTimeout(`${FUSION_API}/cdp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'x-auth-key': 'Tr1bXimgEnV1-sdbAI25'
         },
         body: JSON.stringify({ image_base64: imageData }),
-      });
+      }, FUSION_TIMEOUT_MS);
       if (!response.ok) throw new Error(`CDP failed: ${response.status}`);
       const data = await response.json();
       return data.cdp || data.caption || data.output || '';
+      const result = data.cdp || data.caption || data.output || '';
+      if (!result || !result.trim()) {
+        throw new Error('CDP returned empty output');
+      }
+      return result;
     }
 
     async function runAcp(imageData) {
       // Send the background image to the ACP worker endpoint
-      const response = await fetch(`${FUSION_API}/acp`, {
+      const response = await fetchWithTimeout(`${FUSION_API}/acp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'x-auth-key': 'Tr1bXimgEnV1-sdbAI25'
         },
         body: JSON.stringify({ image_base64: imageData }),
-      });
+      }, FUSION_TIMEOUT_MS);
       if (!response.ok) throw new Error(`ACP failed: ${response.status}`);
       const data = await response.json();
       return data.acp || data.caption || data.output || '';
+      const result = data.acp || data.caption || data.output || '';
+      if (!result || !result.trim()) {
+        throw new Error('ACP returned empty output');
+      }
+      return result;
     }
 
     // SIP Instruction - embedded directly
@@ -321,20 +358,25 @@ Style: oil painting`;
 
     async function runSip(imageData) {
       // Send the merged image to the SIP worker with embedded instruction
-      const response = await fetch(`${FUSION_API}/sip`, {
+      const response = await fetchWithTimeout(`${FUSION_API}/sip`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'x-auth-key': 'Tr1bXimgEnV1-sdbAI25'
         },
         body: JSON.stringify({ 
-          image_base64: imageData,
-          instruction: SIP_INSTRUCTION
+          image_base64: imageData, 
+          instruction: SIP_INSTRUCTION 
         }),
-      });
+      }, FUSION_TIMEOUT_MS);
       if (!response.ok) throw new Error(`SIP failed: ${response.status}`);
       const data = await response.json();
       return data.sip || data.caption || data.output || '';
+      const result = data.sip || data.caption || data.output || '';
+      if (!result || !result.trim()) {
+        throw new Error('SIP returned empty output');
+      }
+      return result;
     }
 
     async function runSynth(cdp, acp, sip) {
@@ -355,7 +397,7 @@ Style: oil painting`;
 
       console.log('Compression prompt length:', compressionPrompt.length);
 
-      const response = await fetch(SYNTH_API, {
+      const response = await fetchWithTimeout(SYNTH_API, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -364,7 +406,7 @@ Style: oil painting`;
         body: JSON.stringify({
           prompt: compressionPrompt
         })
-      });
+      }, SYNTH_TIMEOUT_MS);
 
       const bodyText = await response.text();
 
@@ -404,6 +446,7 @@ Style: oil painting`;
       sipContext = null;
       finalCaption = null;
       fullAnalysis = null;
+      pipelineError = null;
 
       document.getElementById('stylePreview').innerHTML = 'Waiting...';
       document.getElementById('mergedPreview').innerHTML = 'Waiting...';
@@ -424,6 +467,7 @@ Style: oil painting`;
       finalCaption = null;
       mergedImage = null;
       fullAnalysis = null;
+      pipelineError = null;
       // Clear previews for merge, analysis (SIP) and caption. Keep
       // extracted subject and CDP preview intact.
       document.getElementById('mergedPreview').innerHTML = 'Waiting...';
@@ -496,7 +540,9 @@ Style: oil painting`;
         checkReady();
       } catch (error) {
         console.error(error);
-        showStatus(`❌ ACP generation failed: ${error.message}`, 'error');
+        document.getElementById('stylePreview').innerHTML = `<strong style="color: #ef4444;">ACP error:</strong><br>${error.message}`;
+        setPipelineError(`ACP failed: ${error.message}`);
+      
       }
     }
 
@@ -533,42 +579,43 @@ Style: oil painting`;
           const captionEl = document.getElementById('cdpCaption');
           captionEl.innerHTML = `<strong style="color: #ef4444;">CDP error:</strong> ${err.message}`;
           captionEl.style.display = 'block';
-          showStatus(`❌ CDP generation failed: ${err.message}`, 'error');
+          setPipelineError(`CDP failed: ${err.message}`);
+          return;
         }
 
         // After extraction and CDP generation, update readiness for merging.
         checkReady();
       } catch (error) {
         console.error(error);
-        showStatus(`❌ Extraction failed: ${error.message}`, 'error');
+        setPipelineError(`Extraction failed: ${error.message}`);
       }
     }
 
     // Check if ready to merge
     function checkReady() {
-      // Determine if merging can begin: subject extracted, background uploaded,
-      // and ACP/CDP contexts generated. When subject and background are both
-      // present and we aren't currently processing, trigger the merge.
-      // CDP and ACP contexts are not required to begin merging; they are
-      // used later for the final caption. This prevents the UI from stalling
-      // if one of the captions fails but merging can still proceed.
+      if (pipelineError) {
+        document.getElementById('processBtn').disabled = true;
+        return;
+      }
       const readyToMerge =
         extractedSubject &&
+        cdpContext &&
         backgroundImage &&
+        acpContext &&
         !isProcessing;
       if (readyToMerge && !mergedImage) {
         mergeImages();
       }
-      // Enable the process button once all independent contexts (CDP, ACP,
-      // SIP) and the merged image are ready. We no longer wait for the
-      // synthesis (final caption) to enable the button, since the final
-      // caption is generated only when the user clicks the process button.
       const canProcess = mergedImage && cdpContext && acpContext && sipContext;
       document.getElementById('processBtn').disabled = !canProcess || isProcessing;
     }
 
     // Merge extracted subject onto background
     async function mergeImages() {
+      if (!cdpContext || !acpContext) {
+        setPipelineError('Missing CDP or ACP. Merge blocked.');
+        return;
+      }
       showStatus('Merging subject onto background...', 'active');
 
       try {
@@ -616,7 +663,7 @@ Style: oil painting`;
 
       } catch (error) {
         console.error(error);
-        showStatus(`❌ Merge failed: ${error.message}`, 'error');
+        setPipelineError(`Merge failed: ${error.message}`);
       }
     }
 
@@ -640,7 +687,9 @@ Style: oil painting`;
         checkReady();
       } catch (error) {
         console.error(error);
-        showStatus(`❌ SIP generation failed: ${error.message}`, 'error');
+        document.getElementById('analysisPreview').innerHTML = `<strong style="color: #ef4444;">SIP error:</strong><br>${error.message}`;
+        setPipelineError(`SIP failed: ${error.message}`);
+      
       }
     }
 
@@ -650,6 +699,10 @@ Style: oil painting`;
     // already available.
     document.getElementById('processBtn').onclick = async () => {
       // Ensure prerequisites are met
+      if (pipelineError) {
+        showStatus(pipelineError, 'error');
+        return;
+      }
       if (!mergedImage || !cdpContext || !acpContext || !sipContext || isProcessing) {
         showStatus('Please wait for subject, background, and all captions before rendering.', 'error');
         return;
@@ -734,7 +787,7 @@ Style: oil painting`;
     // Check services on load
     window.onload = async () => {
       try {
-        await fetch('https://nfcr-extractor.onrender.com/health');
+        await fetch(REMBG_HEALTH);
         await fetch('https://nfcr-synthesize.onrender.com/features/4/images');
         console.log('✓ Services detected');
       } catch (error) {

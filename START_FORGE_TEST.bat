@@ -6,23 +6,24 @@ echo   Starting Forge Test Stack
 echo ============================================
 echo.
 
-set "PYTHON_EXE=C:\Users\Neurofoundry\AppData\Local\Programs\Python\Python310\python.exe"
 set "FORGE_DIR=D:\0___TESTZONE\_theneurofoundry\import_scripts\Forge"
-set "AI_APP_DIR=D:\0___TESTZONE\AI_BasedApp"
-set "TEST_PAGE=%FORGE_DIR%\SUBJECT_MERGE_TEST_copy.html"
+set "PYTHON_EXE=C:\Users\Neurofoundry\AppData\Local\Programs\Python\Python310\python.exe"
+set "VENV_PY=%FORGE_DIR%\.venv\Scripts\python.exe"
+if exist "%VENV_PY%" set "PYTHON_EXE=%VENV_PY%"
+set "TEST_URL=http://127.0.0.1:8000/SUBJECT_MERGE_TEST_copy.html"
 
 echo Starting Rembg/Composer service (port 5001)...
-start "Forge Extractor" cmd /k "cd /d %FORGE_DIR% && %PYTHON_EXE% subject_extractor.py"
+start "Forge Extractor" cmd /k "cd /d %FORGE_DIR% && set PORT=5001 && %PYTHON_EXE% subject_extractor.py"
 
 timeout /t 3 /nobreak >nul
 
-echo Starting Core API stack (port 8080)...
-start "Neuroforge Core" cmd /k "cd /d %AI_APP_DIR% && %PYTHON_EXE% unified_launcher.py"
+echo Starting local web server (port 8000)...
+start "Forge Web" cmd /k "cd /d %FORGE_DIR% && %PYTHON_EXE% -m http.server 8000"
 
 timeout /t 3 /nobreak >nul
 
 echo Opening test page...
-start "" "%TEST_PAGE%"
+start "" "%TEST_URL%"
 
 echo.
 echo ============================================
