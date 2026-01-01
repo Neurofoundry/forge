@@ -1993,12 +1993,11 @@
       const IS_LOCAL = location.hostname === 'localhost'
         || location.hostname === '127.0.0.1'
         || location.protocol === 'file:';
-      const REMBG_API = IS_LOCAL
-        ? 'http://127.0.0.1:5001/extract'
-        : 'https://nfcr-extractor.onrender.com/extract';
-      const REMBG_HEALTH = IS_LOCAL
-        ? 'http://127.0.0.1:5001/health'
-        : 'https://nfcr-extractor.onrender.com/health';
+      const REMBG_BASE = IS_LOCAL
+        ? 'http://127.0.0.1:5001'
+        : 'https://forge-cbc7wa.fly.dev';
+      const REMBG_API = `${REMBG_BASE}/extract`;
+      const REMBG_HEALTH = `${REMBG_BASE}/health`;
       const CAPTION_API = 'https://nfcr-synthesize.onrender.com/features/4/caption';
       const RENDER_API = 'https://nfcr-synthesize.onrender.com/features/4/render';
       const FUSION_API = 'https://prmptrndr.csirico9.workers.dev/fusion';
