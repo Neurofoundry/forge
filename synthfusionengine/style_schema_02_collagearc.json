@@ -1,0 +1,41 @@
+{
+  "id": "collagearc",
+  "label": "Collage Arc Editorial",
+  "intent": "Portrait-centric layered abstraction with geometric and material overlays",
+  "token_target": 74,
+  "layout": {
+    "format": "bracket_compact",
+    "order": ["subject", "ornament", "palette", "environment", "camera", "finish"]
+  },
+  "slot_budgets": {
+    "subject": 14,
+    "ornament": 12,
+    "palette": 10,
+    "environment": 10,
+    "camera": 8,
+    "finish": 20
+  },
+  "lexicon_bias": {
+    "prefer": [
+      "mixed-media layering",
+      "geometric overlays",
+      "high-chroma accents",
+      "editorial gloss",
+      "fragmented motifs",
+      "graphic collage tension"
+    ],
+    "avoid": [
+      "literal background realism",
+      "single-texture monotony",
+      "low-contrast haze"
+    ]
+  },
+  "negative_defaults": [
+    "dull colors",
+    "plain background",
+    "low detail",
+    "flat lighting"
+  ],
+  "example_compact": "[portrait subject, direct gaze] [reflective visor, layered ornaments, micro details] [teal coral magenta contrast] [abstract mechanical collage field] [tight portrait crop, centered face] [mixed-media layering, geometric overlays, editorial gloss]"
+}
+

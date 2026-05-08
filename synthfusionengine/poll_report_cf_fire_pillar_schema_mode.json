@@ -1,0 +1,71 @@
+{
+  "summary": {
+    "image_id": "fire_pillar",
+    "mode": "schema_plus_image_minimal",
+    "model": "@cf/llava-hf/llava-1.5-7b-hf",
+    "total_ms": 19221,
+    "count": 3
+  },
+  "rows": [
+    {
+      "image_id": "fire_pillar",
+      "schema_id": "pulpvector",
+      "schema_file": "style_schema_01_pulpvector.json",
+      "mode": "schema_plus_image_minimal",
+      "model": "@cf/llava-hf/llava-1.5-7b-hf",
+      "latency_ms": 9517,
+      "raw_response": "[pulpvector, Pulp Vector Impact, Hard-edged, posterized, action-first visual language, 68, bracket_compact, [character, gear, motion, scene, camera, finish], [character:14, gear:10, motion:10, scene:10, camera:8, finish:16], [bold contour, flat cel color, inked outline, dynamic streaks, vintage print grain, impact framing], [soft painterly blur, muted monochrome haze], [blurry, washed out, muddy linework, flat pose]]",
+      "compact_prompt": "[pulpvector, Pulp Vector Impact, Hard-edged, posterized, action-first visual language, 68, bracket_compact, [character, gear, motion, scene, camera, finish] [character:14, gear:10, motion:10, scene:10, camera:8, finish:16] [bold contour, flat cel color, inked outline, dynamic streaks, vintage print grain, impact framing] [soft painterly blur, muted monochrome haze] [blurry, washed out, muddy linework, flat pose]",
+      "negative_prompt": "",
+      "scores": {
+        "character_coverage": 4,
+        "objects": 1,
+        "scene": 4,
+        "atmosphere": 4,
+        "camera": 4,
+        "style": 4,
+        "compactness": 3
+      }
+    },
+    {
+      "image_id": "fire_pillar",
+      "schema_id": "collagearc",
+      "schema_file": "style_schema_02_collagearc.json",
+      "mode": "schema_plus_image_minimal",
+      "model": "@cf/llava-hf/llava-1.5-7b-hf",
+      "latency_ms": 6563,
+      "raw_response": "[portrait subject, direct gaze] [reflective visor, layered ornaments, micro details] [teal coral magenta contrast] [abstract mechanical collage field] [tight portrait crop, centered face] [mixed-media layering, geometric overlays, editorial gloss]",
+      "compact_prompt": "[portrait subject, direct gaze] [reflective visor, layered ornaments, micro details] [teal coral magenta contrast] [abstract mechanical collage field] [tight portrait crop, centered face] [mixed-media layering, geometric overlays, editorial gloss]",
+      "negative_prompt": "",
+      "scores": {
+        "character_coverage": 4,
+        "objects": 1,
+        "scene": 1,
+        "atmosphere": 1,
+        "camera": 1,
+        "style": 4,
+        "compactness": 1
+      }
+    },
+    {
+      "image_id": "fire_pillar",
+      "schema_id": "embermyth",
+      "schema_file": "style_schema_03_embermyth.json",
+      "mode": "schema_plus_image_minimal",
+      "model": "@cf/llava-hf/llava-1.5-7b-hf",
+      "latency_ms": 3139,
+      "raw_response": "[embermyth, label, intent, token\\_target, layout, slot\\_budgets, lexicon\\_bias, negative\\_defaults, example\\_compact]",
+      "compact_prompt": "[embermyth, label, intent, token\\_target, layout, slot\\_budgets, lexicon\\_bias, negative\\_defaults, example\\_compact]",
+      "negative_prompt": "",
+      "scores": {
+        "character_coverage": 1,
+        "objects": 1,
+        "scene": 1,
+        "atmosphere": 1,
+        "camera": 1,
+        "style": 1,
+        "compactness": 1
+      }
+    }
+  ]
+}

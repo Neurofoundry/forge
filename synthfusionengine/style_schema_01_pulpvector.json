@@ -1,0 +1,41 @@
+{
+  "id": "pulpvector",
+  "label": "Pulp Vector Impact",
+  "intent": "Hard-edged, posterized, action-first visual language",
+  "token_target": 68,
+  "layout": {
+    "format": "bracket_compact",
+    "order": ["character", "gear", "motion", "scene", "camera", "finish"]
+  },
+  "slot_budgets": {
+    "character": 14,
+    "gear": 10,
+    "motion": 10,
+    "scene": 10,
+    "camera": 8,
+    "finish": 16
+  },
+  "lexicon_bias": {
+    "prefer": [
+      "bold contour",
+      "flat cel color",
+      "inked outline",
+      "dynamic streaks",
+      "vintage print grain",
+      "impact framing"
+    ],
+    "avoid": [
+      "soft painterly blur",
+      "photoreal skin pores",
+      "muted monochrome haze"
+    ]
+  },
+  "negative_defaults": [
+    "blurry",
+    "washed out",
+    "muddy linework",
+    "flat pose"
+  ],
+  "example_compact": "[masked hero, angular silhouette] [gloves, heavy boots, emblem] [forward sprint, debris streak] [snowy clash zone] [low angle, wide dynamic shot] [bold contour, flat cel color, vintage print grain]"
+}
+

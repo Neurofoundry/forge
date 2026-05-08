@@ -1,0 +1,134 @@
+{
+  "style_compile_request": {
+    "style_profile_id": "epic_fantasy_cinematic",
+    "token_target": 75,
+    "positive_prompt": "armored rider, black mask, gloves, heavy boots",
+    "scene_prompt": "outdoor battlefield, fire and ash, storm clouds",
+    "negative_prompt": "blurry, deformed",
+    "constraints": {
+      "character_lock": true,
+      "min_atmosphere_tokens": 10,
+      "min_camera_tokens": 6
+    },
+    "cdp": {
+      "mode": "cdp",
+      "summary": "armored rider with black gloves and boots",
+      "observed_facts": [
+        "armored rider",
+        "black mask",
+        "gloves",
+        "heavy boots"
+      ],
+      "uncertainty_flags": [],
+      "excluded_assumptions": [],
+      "confidence": 0.82,
+      "drift_score": 0.24
+    },
+    "acp": {
+      "mode": "acp",
+      "summary": "open battlefield with fire and smoke",
+      "observed_facts": [
+        "fire",
+        "smoke",
+        "open field",
+        "stormy sky"
+      ],
+      "uncertainty_flags": [],
+      "excluded_assumptions": [],
+      "confidence": 0.78,
+      "drift_score": 0.29
+    },
+    "sip": {
+      "mode": "sip",
+      "summary": "cinematic low-angle composition",
+      "observed_facts": [
+        "low angle",
+        "high contrast",
+        "cinematic depth"
+      ],
+      "uncertainty_flags": [],
+      "excluded_assumptions": [],
+      "confidence": 0.8,
+      "drift_score": 0.27
+    }
+  },
+  "style_compile_response": {
+    "ok": true,
+    "style_id": "epic_fantasy_cinematic",
+    "style_label": "Epic Fantasy Cinematic",
+    "token_target": 75,
+    "fragments": {
+      "character": [
+        "armored rider",
+        "black mask",
+        "gloves",
+        "heavy boots"
+      ],
+      "objects": [
+        "horse",
+        "damaged plating",
+        "hammer"
+      ],
+      "scene": [
+        "open battlefield",
+        "broken debris"
+      ],
+      "atmosphere": [
+        "fire",
+        "smoke",
+        "storm clouds"
+      ],
+      "camera": [
+        "low angle",
+        "medium-long shot"
+      ],
+      "style": [
+        "painterly fantasy realism",
+        "cinematic depth",
+        "heroic composition"
+      ]
+    },
+    "prompt_compact": "[armored rider, black mask, gloves, heavy boots] [horse, damaged plating, hammer] [open battlefield, broken debris] [fire, smoke, storm clouds] [low angle, medium-long shot] [painterly fantasy realism, cinematic depth, heroic composition]",
+    "prompt_plain": "armored rider, black mask, gloves, heavy boots, horse, damaged plating, hammer, open battlefield, broken debris, fire, smoke, storm clouds, low angle, medium-long shot, painterly fantasy realism, cinematic depth, heroic composition",
+    "negative_prompt": "blurry, deformed, cartoon shading, plastic texture, flat lighting",
+    "metrics": {
+      "token_estimate": 73,
+      "slot_fill_rate": {
+        "character": 1.0,
+        "objects": 0.8,
+        "scene": 0.7,
+        "atmosphere": 1.0,
+        "camera": 0.9,
+        "style": 1.0
+      },
+      "drift_score": 0.22
+    },
+    "trace": {
+      "used": [
+        "armored rider",
+        "black mask",
+        "open battlefield",
+        "low angle"
+      ],
+      "dropped": [
+        "duplicate character color note"
+      ],
+      "reasons": [
+        "duplicate",
+        "over-budget"
+      ]
+    }
+  },
+  "generate_request_example": {
+    "origin": "sdxl",
+    "prompt": "[armored rider, black mask, gloves, heavy boots] [horse, damaged plating, hammer] [open battlefield, broken debris] [fire, smoke, storm clouds] [low angle, medium-long shot] [painterly fantasy realism, cinematic depth, heroic composition]",
+    "negative_prompt": "blurry, deformed, cartoon shading, plastic texture, flat lighting",
+    "width": 1024,
+    "height": 1024,
+    "num_steps": 20,
+    "strength": 0.8,
+    "guidance": 7.5,
+    "seed": 1337
+  }
+}
+

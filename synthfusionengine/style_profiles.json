@@ -1,0 +1,133 @@
+{
+  "version": "0.1.0",
+  "profiles": [
+    {
+      "id": "cinematic",
+      "label": "Cinematic",
+      "token_target": 75,
+      "slot_order": [
+        "character",
+        "objects",
+        "scene",
+        "atmosphere",
+        "camera",
+        "style"
+      ],
+      "slot_budgets": {
+        "character": 20,
+        "objects": 12,
+        "scene": 12,
+        "atmosphere": 14,
+        "camera": 7,
+        "style": 10
+      },
+      "style_terms": [
+        "cinematic lighting",
+        "dramatic contrast",
+        "high detail"
+      ],
+      "negative_defaults": [
+        "blurry",
+        "low quality",
+        "warped anatomy"
+      ]
+    },
+    {
+      "id": "retro_comic_action",
+      "label": "Retro Comic Action",
+      "token_target": 75,
+      "slot_order": [
+        "character",
+        "objects",
+        "scene",
+        "atmosphere",
+        "camera",
+        "style"
+      ],
+      "slot_budgets": {
+        "character": 20,
+        "objects": 12,
+        "scene": 10,
+        "atmosphere": 10,
+        "camera": 8,
+        "style": 15
+      },
+      "style_terms": [
+        "bold ink outlines",
+        "flat cel colors",
+        "vintage print grain",
+        "dynamic action pose"
+      ],
+      "negative_defaults": [
+        "photoreal skin",
+        "soft focus",
+        "muddy colors"
+      ]
+    },
+    {
+      "id": "neo_collage_pop",
+      "label": "Neo Collage Pop",
+      "token_target": 75,
+      "slot_order": [
+        "character",
+        "objects",
+        "scene",
+        "atmosphere",
+        "camera",
+        "style"
+      ],
+      "slot_budgets": {
+        "character": 18,
+        "objects": 12,
+        "scene": 10,
+        "atmosphere": 12,
+        "camera": 8,
+        "style": 15
+      },
+      "style_terms": [
+        "mixed-media collage",
+        "layered geometry",
+        "high chroma accents",
+        "editorial portrait polish"
+      ],
+      "negative_defaults": [
+        "flat monotone",
+        "low detail",
+        "washed out"
+      ]
+    },
+    {
+      "id": "epic_fantasy_cinematic",
+      "label": "Epic Fantasy Cinematic",
+      "token_target": 80,
+      "slot_order": [
+        "character",
+        "objects",
+        "scene",
+        "atmosphere",
+        "camera",
+        "style"
+      ],
+      "slot_budgets": {
+        "character": 20,
+        "objects": 12,
+        "scene": 12,
+        "atmosphere": 16,
+        "camera": 8,
+        "style": 12
+      },
+      "style_terms": [
+        "painterly fantasy realism",
+        "embers and smoke",
+        "heroic composition",
+        "cinematic depth"
+      ],
+      "negative_defaults": [
+        "cartoon shading",
+        "plastic texture",
+        "flat lighting"
+      ]
+    }
+  ]
+}
+

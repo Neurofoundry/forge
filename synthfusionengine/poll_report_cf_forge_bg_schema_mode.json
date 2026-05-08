@@ -1,0 +1,71 @@
+{
+  "summary": {
+    "image_id": "forge_bg",
+    "mode": "schema_plus_image_minimal",
+    "model": "@cf/llava-hf/llava-1.5-7b-hf",
+    "total_ms": 59899,
+    "count": 3
+  },
+  "rows": [
+    {
+      "image_id": "forge_bg",
+      "schema_id": "pulpvector",
+      "schema_file": "style_schema_01_pulpvector.json",
+      "mode": "schema_plus_image_minimal",
+      "model": "@cf/llava-hf/llava-1.5-7b-hf",
+      "latency_ms": 6945,
+      "raw_response": "[flaming torch, fire streaks, sparks] [fire, heat, intensity] [explosive force, dramatic impact] [night sky, dark background] [fast motion, dynamic action] [pulp fiction, hard-edged style]",
+      "compact_prompt": "[flaming torch, fire streaks, sparks] [fire, heat, intensity] [explosive force, dramatic impact] [night sky, dark background] [fast motion, dynamic action] [pulp fiction, hard-edged style]",
+      "negative_prompt": "",
+      "scores": {
+        "character_coverage": 1,
+        "objects": 1,
+        "scene": 1,
+        "atmosphere": 1,
+        "camera": 1,
+        "style": 4,
+        "compactness": 1
+      }
+    },
+    {
+      "image_id": "forge_bg",
+      "schema_id": "collagearc",
+      "schema_file": "style_schema_02_collagearc.json",
+      "mode": "schema_plus_image_minimal",
+      "model": "@cf/llava-hf/llava-1.5-7b-hf",
+      "latency_ms": 44196,
+      "raw_response": "[flame, fire, bright, yellow, orange, red, white, black, sparks, firework, explosion, flares, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, flare, f",
+      "compact_prompt": "",
+      "negative_prompt": "",
+      "scores": {
+        "character_coverage": 1,
+        "objects": 1,
+        "scene": 1,
+        "atmosphere": 1,
+        "camera": 1,
+        "style": 1,
+        "compactness": 2
+      }
+    },
+    {
+      "image_id": "forge_bg",
+      "schema_id": "embermyth",
+      "schema_file": "style_schema_03_embermyth.json",
+      "mode": "schema_plus_image_minimal",
+      "model": "@cf/llava-hf/llava-1.5-7b-hf",
+      "latency_ms": 8741,
+      "raw_response": "[flames, fire, heat, smoke, embers, ash, storm, battlefield, armored rider, black gloves, heavy boots, war horse, weathered cloak, open battlefield, broken terrain, painterly realism, heroic silhouette, dramatic rim light, low angle, medium-long shot, depth separation, embermyth]",
+      "compact_prompt": "[flames, fire, heat, smoke, embers, ash, storm, battlefield, armored rider, black gloves, heavy boots, war horse, weathered cloak, open battlefield, broken terrain, painterly realism, heroic silhouette, dramatic rim light, low angle, medium-long shot, depth separation, embermyth]",
+      "negative_prompt": "",
+      "scores": {
+        "character_coverage": 4,
+        "objects": 4,
+        "scene": 4,
+        "atmosphere": 4,
+        "camera": 4,
+        "style": 4,
+        "compactness": 1
+      }
+    }
+  ]
+}

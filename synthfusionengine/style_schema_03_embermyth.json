@@ -1,0 +1,41 @@
+{
+  "id": "embermyth",
+  "label": "Ember Mythic Realism",
+  "intent": "Heroic fantasy realism with atmosphere and cinematic depth priority",
+  "token_target": 82,
+  "layout": {
+    "format": "bracket_compact",
+    "order": ["character", "mount_or_prop", "scene", "atmosphere", "camera", "finish"]
+  },
+  "slot_budgets": {
+    "character": 16,
+    "mount_or_prop": 10,
+    "scene": 10,
+    "atmosphere": 18,
+    "camera": 10,
+    "finish": 18
+  },
+  "lexicon_bias": {
+    "prefer": [
+      "embers and smoke",
+      "storm heat haze",
+      "heroic silhouette",
+      "painterly realism",
+      "cinematic depth layering",
+      "dramatic rim light"
+    ],
+    "avoid": [
+      "cartoon simplification",
+      "plastic surfaces",
+      "flat ambient light"
+    ]
+  },
+  "negative_defaults": [
+    "deformed anatomy",
+    "soft blur",
+    "overexposed highlights",
+    "flat composition"
+  ],
+  "example_compact": "[armored rider, black gloves, heavy boots] [war horse, weathered cloak] [open battlefield, broken terrain] [embers, smoke, storm heat haze, wind-swept ash] [low angle, medium-long shot, depth separation] [painterly realism, heroic silhouette, dramatic rim light]"
+}
+

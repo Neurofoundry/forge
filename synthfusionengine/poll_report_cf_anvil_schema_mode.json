@@ -1,0 +1,71 @@
+{
+  "summary": {
+    "image_id": "anvil",
+    "mode": "schema_plus_image_minimal",
+    "model": "@cf/llava-hf/llava-1.5-7b-hf",
+    "total_ms": 15998,
+    "count": 3
+  },
+  "rows": [
+    {
+      "image_id": "anvil",
+      "schema_id": "pulpvector",
+      "schema_file": "style_schema_01_pulpvector.json",
+      "mode": "schema_plus_image_minimal",
+      "model": "@cf/llava-hf/llava-1.5-7b-hf",
+      "latency_ms": 9376,
+      "raw_response": "[red hammer, gear, motion, scene, camera, finish] [hard-edged, posterized, action-first visual language] [14, 10, 10, 10, 10, 8, 16] [bold contour, flat cel color, vintage print grain] [masked hero, angular silhouette] [gloves, heavy boots, emblem] [forward sprint, debris streak] [snowy clash zone] [low angle, wide dynamic shot] [blurry, washed out, muddy linework, flat pose]",
+      "compact_prompt": "[red hammer, gear, motion, scene, camera, finish] [hard-edged, posterized, action-first visual language] [14, 10, 10, 10, 10, 8, 16] [bold contour, flat cel color, vintage print grain] [masked hero, angular silhouette] [gloves, heavy boots, emblem] [forward sprint, debris streak] [snowy clash zone] [low angle, wide dynamic shot] [blurry, washed out, muddy linework, flat pose]",
+      "negative_prompt": "",
+      "scores": {
+        "character_coverage": 4,
+        "objects": 4,
+        "scene": 4,
+        "atmosphere": 1,
+        "camera": 4,
+        "style": 1,
+        "compactness": 3
+      }
+    },
+    {
+      "image_id": "anvil",
+      "schema_id": "collagearc",
+      "schema_file": "style_schema_02_collagearc.json",
+      "mode": "schema_plus_image_minimal",
+      "model": "@cf/llava-hf/llava-1.5-7b-hf",
+      "latency_ms": 3266,
+      "raw_response": "[collagearc, label, intent, token\\_target, layout, slot\\_budgets, lexicon\\_bias, negative\\_defaults, example\\_compact]",
+      "compact_prompt": "[collagearc, label, intent, token\\_target, layout, slot\\_budgets, lexicon\\_bias, negative\\_defaults, example\\_compact]",
+      "negative_prompt": "",
+      "scores": {
+        "character_coverage": 1,
+        "objects": 1,
+        "scene": 1,
+        "atmosphere": 1,
+        "camera": 1,
+        "style": 4,
+        "compactness": 1
+      }
+    },
+    {
+      "image_id": "anvil",
+      "schema_id": "embermyth",
+      "schema_file": "style_schema_03_embermyth.json",
+      "mode": "schema_plus_image_minimal",
+      "model": "@cf/llava-hf/llava-1.5-7b-hf",
+      "latency_ms": 3355,
+      "raw_response": "[embermyth, label, intent, token\\_target, layout, slot\\_budgets, lexicon\\_bias, negative\\_defaults, example\\_compact]",
+      "compact_prompt": "[embermyth, label, intent, token\\_target, layout, slot\\_budgets, lexicon\\_bias, negative\\_defaults, example\\_compact]",
+      "negative_prompt": "",
+      "scores": {
+        "character_coverage": 1,
+        "objects": 1,
+        "scene": 1,
+        "atmosphere": 1,
+        "camera": 1,
+        "style": 1,
+        "compactness": 1
+      }
+    }
+  ]
+}

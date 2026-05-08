@@ -1,0 +1,360 @@
+{
+  "version": "0.1.0",
+  "updated_utc": "2026-03-01T00:00:00Z",
+  "engine": "synthfusion",
+  "goals": [
+    "Image-first decomposition",
+    "Compact prompt composition",
+    "Style-profile-driven output",
+    "Stable routing and deterministic fallbacks"
+  ],
+  "routing": {
+    "priority_order": [
+      "cdp",
+      "acp",
+      "sip",
+      "synth",
+      "fusion"
+    ],
+    "compile_routing": [
+      "If cdp/acp/sip are provided, compile directly.",
+      "Else if source_image_b64 exists, run fusion then compile.",
+      "Else compile from positive_prompt + scene_prompt + negative_prompt."
+    ],
+    "deterministic_fallback": true
+  },
+  "schemas": {
+    "analysis_contract": {
+      "type": "object",
+      "required": [
+        "mode",
+        "summary",
+        "observed_facts",
+        "uncertainty_flags",
+        "excluded_assumptions",
+        "confidence",
+        "drift_score"
+      ],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "cdp",
+            "acp",
+            "sip"
+          ]
+        },
+        "summary": {
+          "type": "string"
+        },
+        "observed_facts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "uncertainty_flags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "excluded_assumptions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "drift_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "compile_request": {
+      "type": "object",
+      "required": [
+        "style_profile_id"
+      ],
+      "properties": {
+        "style_profile_id": {
+          "type": "string"
+        },
+        "token_target": {
+          "type": "integer",
+          "minimum": 30,
+          "maximum": 180,
+          "default": 75
+        },
+        "positive_prompt": {
+          "type": "string"
+        },
+        "scene_prompt": {
+          "type": "string"
+        },
+        "negative_prompt": {
+          "type": "string"
+        },
+        "constraints": {
+          "type": "object",
+          "properties": {
+            "character_lock": {
+              "type": "boolean",
+              "default": true
+            },
+            "min_atmosphere_tokens": {
+              "type": "integer",
+              "default": 10
+            },
+            "min_camera_tokens": {
+              "type": "integer",
+              "default": 6
+            }
+          }
+        },
+        "cdp": {
+          "type": [
+            "object",
+            "string"
+          ]
+        },
+        "acp": {
+          "type": [
+            "object",
+            "string"
+          ]
+        },
+        "sip": {
+          "type": [
+            "object",
+            "string"
+          ]
+        },
+        "source_image_b64": {
+          "type": "string"
+        }
+      }
+    },
+    "compile_response": {
+      "type": "object",
+      "required": [
+        "ok",
+        "style_id",
+        "token_target",
+        "fragments",
+        "prompt_compact",
+        "prompt_plain",
+        "negative_prompt",
+        "metrics",
+        "trace"
+      ],
+      "properties": {
+        "ok": {
+          "type": "boolean"
+        },
+        "style_id": {
+          "type": "string"
+        },
+        "style_label": {
+          "type": "string"
+        },
+        "token_target": {
+          "type": "integer"
+        },
+        "fragments": {
+          "type": "object",
+          "properties": {
+            "character": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "objects": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "scene": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "atmosphere": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "camera": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "style": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "prompt_compact": {
+          "type": "string",
+          "description": "Bracketed compact form: [..] [..] [..]"
+        },
+        "prompt_plain": {
+          "type": "string",
+          "description": "Flattened comma-separated form"
+        },
+        "negative_prompt": {
+          "type": "string"
+        },
+        "metrics": {
+          "type": "object",
+          "properties": {
+            "token_estimate": {
+              "type": "integer"
+            },
+            "slot_fill_rate": {
+              "type": "object"
+            },
+            "drift_score": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          }
+        },
+        "trace": {
+          "type": "object",
+          "properties": {
+            "used": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "dropped": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "reasons": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "generate_request": {
+      "type": "object",
+      "required": [
+        "prompt"
+      ],
+      "properties": {
+        "origin": {
+          "type": "string",
+          "enum": [
+            "sdxl",
+            "phoenix",
+            "flux",
+            "dreamshaper"
+          ],
+          "default": "sdxl"
+        },
+        "prompt": {
+          "type": "string",
+          "minLength": 1
+        },
+        "negative_prompt": {
+          "type": "string"
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 256,
+          "maximum": 2048,
+          "default": 1024
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 256,
+          "maximum": 2048,
+          "default": 1024
+        },
+        "image": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+          }
+        },
+        "image_b64": {
+          "type": "string"
+        },
+        "mask": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+          }
+        },
+        "num_steps": {
+          "type": "integer",
+          "default": 20,
+          "minimum": 1,
+          "maximum": 20
+        },
+        "strength": {
+          "type": "number",
+          "default": 1,
+          "minimum": 0,
+          "maximum": 1
+        },
+        "guidance": {
+          "type": "number",
+          "default": 7.5,
+          "minimum": 0,
+          "maximum": 30
+        },
+        "seed": {
+          "type": "integer"
+        }
+      }
+    }
+  },
+  "slot_model": {
+    "slot_order_default": [
+      "character",
+      "objects",
+      "scene",
+      "atmosphere",
+      "camera",
+      "style"
+    ],
+    "token_budget_default": {
+      "character": 20,
+      "objects": 12,
+      "scene": 12,
+      "atmosphere": 14,
+      "camera": 7,
+      "style": 10
+    }
+  }
+}
+

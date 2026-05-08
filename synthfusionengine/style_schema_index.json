@@ -1,0 +1,21 @@
+{
+  "version": "0.1.0",
+  "schemas": [
+    {
+      "id": "pulpvector",
+      "file": "style_schema_01_pulpvector.json",
+      "label": "Pulp Vector Impact"
+    },
+    {
+      "id": "collagearc",
+      "file": "style_schema_02_collagearc.json",
+      "label": "Collage Arc Editorial"
+    },
+    {
+      "id": "embermyth",
+      "file": "style_schema_03_embermyth.json",
+      "label": "Ember Mythic Realism"
+    }
+  ]
+}
+

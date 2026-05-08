@@ -1,0 +1,78 @@
+{
+  "version": "0.1.0",
+  "goal": "Poll an LLM with minimal prompting and compare raw pushback under radically different style schemas.",
+  "schemas": [
+    "style_schema_01_pulpvector.json",
+    "style_schema_02_collagearc.json",
+    "style_schema_03_embermyth.json"
+  ],
+  "poll_modes": [
+    {
+      "id": "image_only",
+      "description": "No textual instruction, image only. Capture raw visual priors."
+    },
+    {
+      "id": "schema_plus_image_minimal",
+      "description": "Schema JSON + image, no additional stylistic instructions beyond 'fill this format'."
+    }
+  ],
+  "request_templates": {
+    "image_only": {
+      "input": [
+        {
+          "type": "input_image",
+          "image_b64": "<IMAGE_B64>"
+        }
+      ]
+    },
+    "schema_plus_image_minimal": {
+      "input": [
+        {
+          "type": "input_text",
+          "text": "Use this schema format only. Return compact bracket output and negative list."
+        },
+        {
+          "type": "input_text",
+          "text": "<SCHEMA_JSON>"
+        },
+        {
+          "type": "input_image",
+          "image_b64": "<IMAGE_B64>"
+        }
+      ]
+    }
+  },
+  "evaluation": {
+    "compare_fields": [
+      "character coverage",
+      "distinct object recall",
+      "scene grounding",
+      "atmosphere richness",
+      "camera specificity",
+      "style adherence",
+      "token compactness"
+    ],
+    "scoring": {
+      "scale": "0-5",
+      "notes": "Prefer concrete visible facts over invented details."
+    }
+  },
+  "output_capture_schema": {
+    "image_id": "string",
+    "schema_id": "string",
+    "mode": "image_only|schema_plus_image_minimal",
+    "raw_response": "string",
+    "compact_prompt": "string",
+    "negative_prompt": "string",
+    "scores": {
+      "character_coverage": 0,
+      "objects": 0,
+      "scene": 0,
+      "atmosphere": 0,
+      "camera": 0,
+      "style": 0,
+      "compactness": 0
+    }
+  }
+}
+
