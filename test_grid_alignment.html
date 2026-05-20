@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grid Alignment Test Page</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        .box {
+            position: absolute;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            font-weight: 500;
+        }
+        
+        button, input, textarea, select {
+            margin: 5px;
+            padding: 8px 12px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        
+        button {
+            cursor: pointer;
+            background: white;
+            transition: transform 0.1s;
+        }
+        
+        button:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Left Area -->
+    <div class="box" style="background: #ff0000; color: white; top: 20px; left: 20px;">
+        Red Block
+        <button>Click Me</button>
+    </div>
+    
+    <!-- Top Center -->
+    <div class="box" style="background: #00ff00; color: black; top: 50px; left: 40%;">
+        Green Square
+        <input type="text" placeholder="Enter text">
+    </div>
+    
+    <!-- Top Right -->
+    <div class="box" style="background: #0000ff; color: white; top: 30px; right: 50px;">
+        Blue Box
+        <select>
+            <option>Option A</option>
+            <option>Option B</option>
+            <option>Option C</option>
+        </select>
+    </div>
+    
+    <!-- Middle Left -->
+    <div class="box" style="background: #ffff00; color: black; top: 200px; left: 80px;">
+        Yellow Panel
+        <textarea placeholder="Type something"></textarea>
+    </div>
+    
+    <!-- Center -->
+    <div class="box" style="background: #ff9900; color: white; top: 250px; left: 45%;">
+        Orange Center
+        <button>Submit</button>
+        <button>Cancel</button>
+    </div>
+    
+    <!-- Middle Right -->
+    <div class="box" style="background: #9900ff; color: white; top: 220px; right: 100px;">
+        Purple Section
+        <input type="checkbox" id="check1">
+        <label for="check1">Enable feature</label>
+    </div>
+    
+    <!-- Lower Left -->
+    <div class="box" style="background: #00ffff; color: black; top: 400px; left: 50px;">
+        Cyan Area
+        <a href="#" style="color: blue; text-decoration: underline;">Link Here</a>
+    </div>
+    
+    <!-- Lower Center -->
+    <div class="box" style="background: #ff00ff; color: white; top: 450px; left: 50%;">
+        Magenta Zone
+        <input type="radio" name="choice" id="r1">
+        <label for="r1">Choice 1</label>
+        <input type="radio" name="choice" id="r2">
+        <label for="r2">Choice 2</label>
+    </div>
+    
+    <!-- Lower Right -->
+    <div class="box" style="background: #00ff99; color: black; top: 420px; right: 70px;">
+        Teal Block
+        <button>Action</button>
+    </div>
+    
+    <!-- Bottom Left -->
+    <div class="box" style="background: #ff6699; color: white; bottom: 80px; left: 100px;">
+        Pink Container
+        <input type="number" placeholder="123">
+    </div>
+    
+    <!-- Bottom Center -->
+    <div class="box" style="background: #66ccff; color: black; bottom: 100px; left: 42%;">
+        Sky Blue Box
+        <button>Confirm</button>
+        <button>Reset</button>
+    </div>
+    
+    <!-- Bottom Right -->
+    <div class="box" style="background: #cc6600; color: white; bottom: 60px; right: 80px;">
+        Brown Panel
+        <select>
+            <option>Small</option>
+            <option>Medium</option>
+            <option>Large</option>
+        </select>
+    </div>
+    
+    <!-- Random scattered text elements -->
+    <div style="position: absolute; top: 150px; left: 600px; font-size: 18px; color: #333;">
+        Standalone Text
+    </div>
+    
+    <div style="position: absolute; top: 350px; left: 300px;">
+        <input type="date">
+    </div>
+    
+    <div style="position: absolute; top: 500px; right: 300px;">
+        <input type="email" placeholder="email@example.com">
+    </div>
+    
+    <div style="position: absolute; bottom: 200px; left: 400px; font-weight: bold; color: #666;">
+        Random Label Text
+    </div>
+    
+    <!-- Additional variety -->
+    <div style="position: absolute; top: 120px; right: 250px;">
+        <button style="background: #ffcc00; border: 2px solid #ff9900;">Golden Button</button>
+    </div>
+    
+    <div style="position: absolute; top: 320px; left: 200px;">
+        <input type="range" min="0" max="100">
+    </div>
+    
+    <div style="position: absolute; bottom: 150px; right: 200px; padding: 10px; background: white; border: 2px dashed #999;">
+        Dashed Border Box
+    </div>
+
+</body>
+</html>
