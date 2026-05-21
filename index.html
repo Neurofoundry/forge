@@ -15,157 +15,20 @@
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       overflow: hidden;
       line-height: 1.6;
+      --forge-mobile-shell: min(calc(100vw - 32px), 746px);
     }
-    
-    /* Header Styles */
-    header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 2000;
-      background: rgba(11, 12, 14, 0.95);
-      backdrop-filter: blur(10px);
-      border-bottom: 2px solid #e0473c;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-      height: 64px;
+
+    .nf-site-header {
+      position: fixed !important;
+      top: 0 !important;
+      z-index: 10000 !important;
+      transform: none !important;
+      transition: none !important;
     }
-    .nav {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 100%;
-      max-width: 1600px;
-      margin: 0 auto;
-      padding: 0 18px;
-      width: 100%;
-    }
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-weight: 700;
-      font-size: 16px;
-      letter-spacing: 0.5px;
-      text-decoration: none;
-      color: #e6e9ee;
-    }
-    .brand-icon {
-      width: 36px;
-      height: 36px;
-      background: linear-gradient(135deg, #ff7b6e 0%, #e0473c 100%);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 900;
-      font-size: 18px;
-      color: white;
-      box-shadow: 0 4px 12px rgba(224, 71, 60, 0.3);
-    }
-    .links {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
-    .navlink {
-      color: #ccc;
-      font-size: 14px;
-      font-weight: 500;
-      text-decoration: none;
-      transition: color 0.2s;
-    }
-    .navlink:hover { color: #e0473c; }
-    .nav-item { position: relative; }
-    .dropdown-toggle {
-      background: none;
-      border: none;
-      padding: 0;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      cursor: pointer;
-      color: #ccc;
-      font: 500 14px/1 Inter, sans-serif;
-      transition: color 0.2s;
-    }
-    .dropdown-toggle:hover,
-    .dropdown-toggle:focus-visible {
-      color: #e0473c;
-      outline: none;
-    }
-    .dropdown-caret {
-      font-size: 11px;
-      opacity: 0.7;
-    }
-    .dropdown-menu {
-      position: absolute;
-      top: calc(100% + 6px);
-      left: 0;
-      min-width: 200px;
-      background: rgba(15, 17, 19, 0.96);
-      border: 1px solid rgba(224, 71, 60, 0.25);
-      border-radius: 12px;
-      padding: 10px;
-      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
-      opacity: 0;
-      transform: translateY(6px);
-      pointer-events: none;
-      transition: opacity 0.2s ease, transform 0.2s ease;
-      z-index: 50;
-    }
-    .dropdown::after {
-      content: "";
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: 100%;
-      height: 10px;
-    }
-    .dropdown-menu a {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 10px;
-      border-radius: 8px;
-      color: #c9d0d8;
-      text-decoration: none;
-      font-size: 13px;
-      font-weight: 500;
-      transition: background 0.2s, color 0.2s;
-      white-space: nowrap;
-    }
-    .dropdown-menu a:hover {
-      background: rgba(224, 71, 60, 0.18);
-      color: #fff;
-    }
-    .dropdown:hover .dropdown-menu,
-    .dropdown:focus-within .dropdown-menu {
-      opacity: 1;
-      transform: translateY(0);
-      pointer-events: auto;
-    }
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 8px 18px;
-      border-radius: 8px;
-      font: 600 13px/1 Inter, sans-serif;
-      cursor: pointer;
-      text-decoration: none;
-      transition: all 0.2s ease;
-      border: 2px solid transparent;
-    }
-    .btn.primary {
-      background: linear-gradient(180deg, #ff7b6e 0%, #e9584d 48%, #d23d33 100%);
-      border-color: #a2362f;
-      color: #fff;
-      box-shadow: 0 4px 12px rgba(224, 71, 60, 0.3);
-    }
-    .btn.primary:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(224, 71, 60, 0.4);
+
+    .nf-site-header.scroll-down,
+    .nf-site-header.scroll-up {
+      transform: none !important;
     }
     
     /* Main Container */
@@ -370,6 +233,10 @@
     }
     .panel.right-panel {
       max-height: 89%;
+    }
+
+    .mobile-forge-tabs {
+      display: none;
     }
     .synth-loading {
       position: absolute;
@@ -681,6 +548,13 @@
       border: 1px solid rgba(224, 71, 60, 0.3);
       overflow: hidden;
       box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.6);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.18s ease, visibility 0.18s ease;
+    }
+    .fusion-progress.is-active {
+      opacity: 1;
+      visibility: visible;
     }
     .fusion-progress-fill {
       display: block;
@@ -910,10 +784,20 @@
       border: none;
       border-radius: 2px;
       z-index: 500; /* behind https://github.com/Neurofoundry/forge/blob/12a23c717a868465013f8044a72087b2c79ea6a7/furnace.png frame so video appears inside furnace */
-      overflow: hidden;
+      overflow: visible;
       box-shadow: 
         inset 0 0 30px rgba(0, 0, 0, 0.9),
         0 0 40px rgba(0, 0, 0, 0.6);
+    }
+
+    .media-viewer .furnace-header {
+      position: absolute;
+      left: 0;
+      top: -34px;
+      width: auto;
+      margin: 0;
+      z-index: 2;
+      pointer-events: none;
     }
     
     .media-container {
@@ -924,6 +808,8 @@
       justify-content: center;
       background: #000000;
       position: relative;
+      overflow: hidden;
+      border-radius: inherit;
     }
     
     .media-content {
@@ -1431,6 +1317,13 @@
       display: grid;
       grid-template-columns: repeat(16, 1fr);
       gap: 8px;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .craft-items::-webkit-scrollbar {
+      width: 0;
+      height: 0;
     }
     
     .craft-item {
@@ -1642,7 +1535,7 @@
       100% { opacity: 0; transform: scale(0.15) translate(5px, 0); }
     }
 
-    @media (max-width: 900px) {
+    @media (max-width: 1100px) {
       html {
         max-width: 100%;
         overflow-x: hidden;
@@ -1652,62 +1545,25 @@
         max-width: 100%;
         overflow-x: hidden;
         overflow-y: auto;
-      }
-
-      header {
-        height: 56px;
-      }
-
-      .nav {
-        padding: 0 12px;
-        gap: 10px;
-      }
-
-      .brand {
-        gap: 8px;
-        min-width: 0;
-        font-size: 14px;
-        letter-spacing: 0;
-      }
-
-      .brand-icon {
-        width: 32px;
-        height: 32px;
-        border-radius: 8px;
-        font-size: 15px;
-        flex: 0 0 auto;
-      }
-
-      .links {
-        gap: 13px;
-        min-width: 0;
-        justify-content: flex-end;
-      }
-
-      .navlink,
-      .dropdown-toggle {
-        font-size: 13px;
-        white-space: nowrap;
-      }
-
-      .btn.primary {
-        display: none;
+        --forge-mobile-shell: min(calc(100vw - 32px), 746px);
+        --forge-mobile-line: rgba(224, 71, 60, 0.58);
+        --forge-mobile-line-soft: rgba(224, 71, 60, 0.24);
       }
 
       .forge-container {
         display: block;
         height: auto;
-        min-height: calc(100svh - 56px);
-        margin-top: 56px;
+        min-height: calc(100svh - 64px);
+        margin-top: 64px;
         overflow: visible;
-        padding: 0 0 28px;
+        padding: 54px 0 28px;
       }
 
       .furnace-back,
       .furnace-front {
         position: fixed;
         background-attachment: scroll;
-        background-size: auto 100%;
+        background-size: auto 86%;
         background-position: center top;
         -webkit-mask-image: none;
         mask-image: none;
@@ -1731,6 +1587,13 @@
         opacity: 0.42;
       }
 
+      #design-overlay {
+        position: fixed;
+        background-size: auto 86%;
+        background-position: center top;
+        background-repeat: no-repeat;
+      }
+
       #forge-atmosphere {
         position: fixed;
         background: linear-gradient(to top, rgba(0,0,0,0.72) 0%, transparent 72%);
@@ -1741,9 +1604,9 @@
         top: auto;
         left: auto;
         transform: none;
-        width: min(92vw, 680px);
-        margin: 72px auto 16px;
-        z-index: 1000;
+        width: var(--forge-mobile-shell);
+        margin: 0 auto 10px;
+        z-index: 900;
         border: 1px solid rgba(224, 71, 60, 0.56);
         box-shadow:
           inset 0 0 28px rgba(0, 0, 0, 0.9),
@@ -1763,21 +1626,191 @@
         inset: auto;
         width: 100%;
         height: auto;
-        padding: 0 14px 112px;
+        padding: 0;
         display: block;
         pointer-events: auto;
       }
 
       .furnace-header {
-        margin: 0 auto 12px;
-        width: min(100%, 680px);
+        position: absolute;
+        left: 0;
+        top: -32px;
+        display: block;
+        width: auto;
+        margin: 0;
+        z-index: 3;
+        pointer-events: none;
       }
 
-      .header-label {
+      .furnace-header .header-label {
+        display: inline-flex;
+        width: auto;
         font-size: 10px;
         padding: 5px 10px;
         background: rgba(11, 11, 11, 0.78);
         border: 1px solid rgba(224, 71, 60, 0.24);
+      }
+
+      .mobile-forge-tabs {
+        position: relative;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        width: var(--forge-mobile-shell);
+        margin: 0 auto -1px;
+        border: 0;
+        background: transparent;
+        overflow: visible;
+        z-index: 4;
+      }
+
+      .mobile-forge-tabs::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        height: 2px;
+        z-index: 3;
+        background: linear-gradient(90deg, transparent 0, var(--forge-mobile-line) 7%, var(--forge-mobile-line) 50%, var(--forge-mobile-line) 93%, transparent 100%);
+        clip-path: polygon(11px 0, calc(100% - 11px) 0, 100% 100%, 0 100%);
+        box-shadow: 0 0 10px rgba(224, 71, 60, 0.22);
+        pointer-events: none;
+      }
+
+      .panels-container.mobile-active-assets .mobile-forge-tabs::before {
+        left: 0;
+        right: 50%;
+      }
+
+      .panels-container.mobile-active-synthesize .mobile-forge-tabs::before {
+        left: 50%;
+        right: 0;
+      }
+
+      .mobile-forge-tab {
+        appearance: none;
+        position: relative;
+        z-index: 1;
+        border: 1px solid rgba(224, 71, 60, 0.16);
+        border-bottom-color: var(--forge-mobile-line-soft);
+        border-right: 1px solid rgba(224, 71, 60, 0.1);
+        background: rgba(18, 7, 6, 0.58);
+        color: rgba(255, 238, 229, 0.56);
+        height: 52px;
+        font: 750 14px/1 'Inter', system-ui, sans-serif;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 8px;
+        opacity: 0.78;
+        padding: 0 14px;
+        box-shadow: none;
+        transition: color 0.16s ease, background 0.16s ease, opacity 0.16s ease;
+      }
+
+      .mobile-forge-tab .tab-index {
+        width: 27px;
+        height: 27px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(83, 28, 24, 0.92);
+        color: rgba(255, 255, 255, 0.82);
+        font: 800 15px/1 'Inter', system-ui, sans-serif;
+        line-height: 1;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+      }
+
+      .mobile-forge-tab .tab-label {
+        min-width: 0;
+        color: rgba(255, 238, 229, 0.58);
+      }
+
+      .mobile-forge-tab:last-child {
+        border-right-color: transparent;
+      }
+
+      .mobile-forge-tab[aria-selected="true"] {
+        z-index: 5;
+        background: linear-gradient(180deg, rgba(11, 9, 9, 0.99), rgba(4, 4, 4, 0.99));
+        color: #ffffff;
+        border-color: var(--forge-mobile-line-soft);
+        border-bottom-color: transparent;
+        opacity: 1;
+        box-shadow:
+          inset 0 2px 0 var(--forge-mobile-line),
+          inset 1px 0 0 rgba(255, 119, 104, 0.2),
+          inset -1px 0 0 rgba(224, 71, 60, 0.2),
+          inset -18px 0 24px rgba(224, 71, 60, 0.08),
+          inset 0 -18px 22px rgba(0, 0, 0, 0.32),
+          0 8px 18px rgba(0, 0, 0, 0.26);
+      }
+
+      .mobile-forge-tab[aria-selected="true"]::before {
+        content: '';
+        position: absolute;
+        top: 4px;
+        right: 0;
+        bottom: 8px;
+        width: 1px;
+        background: linear-gradient(180deg, rgba(255, 119, 104, 0.34), rgba(224, 71, 60, 0.08));
+        pointer-events: none;
+      }
+
+      .mobile-forge-tab[aria-selected="true"]::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -2px;
+        height: 3px;
+        background: rgba(4, 4, 4, 0.99);
+        pointer-events: none;
+      }
+
+      .mobile-forge-tab[aria-selected="true"] .tab-label {
+        color: #ffffff;
+        text-shadow: 0 0 14px rgba(224, 71, 60, 0.28);
+      }
+
+      .mobile-forge-tab[aria-selected="false"] .tab-label {
+        color: rgba(255, 238, 229, 0.58);
+      }
+
+      .mobile-forge-tab[aria-selected="false"] {
+        border-top-color: transparent;
+        background:
+          linear-gradient(180deg, rgba(14, 12, 12, 0.82), rgba(5, 5, 5, 0.76)),
+          rgba(18, 7, 6, 0.5);
+        opacity: 0.54;
+        filter: grayscale(0.82);
+        box-shadow:
+          inset 1px 0 0 rgba(255, 255, 255, 0.06),
+          inset -1px 0 0 rgba(224, 71, 60, 0.1),
+          inset 18px 0 28px rgba(0, 0, 0, 0.22),
+          inset 0 -18px 24px rgba(0, 0, 0, 0.22);
+      }
+
+      .mobile-forge-tab[aria-selected="false"]::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 5px;
+        height: 2px;
+        background: rgba(224, 71, 60, 0.24);
+        box-shadow: 0 0 8px rgba(224, 71, 60, 0.12);
+        pointer-events: none;
+      }
+
+      .mobile-forge-tab[aria-selected="true"] .tab-index {
+        background: linear-gradient(180deg, #ff6c5f, #d84136);
+        box-shadow: 0 0 18px rgba(224, 71, 60, 0.32);
+      }
+
+      .mobile-forge-tab[aria-selected="false"] .tab-index {
+        background: rgba(83, 28, 24, 0.92);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
       }
 
       .panels-row {
@@ -1785,30 +1818,254 @@
         top: auto;
         left: auto;
         right: auto;
-        width: min(100%, 680px);
-        height: auto;
+        width: var(--forge-mobile-shell);
         margin: 0 auto;
         padding: 0;
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 14px;
+        display: block;
+        height: clamp(350px, 43svh, 390px);
+        overflow: hidden;
+        border: 1px solid var(--forge-mobile-line-soft);
+        border-top: 0;
+        background: linear-gradient(180deg, rgba(4, 4, 4, 0.98), rgba(5, 3, 3, 0.96));
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(224, 71, 60, 0.15);
         pointer-events: auto;
+      }
+
+      .panels-row::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        height: 1px;
+        background: var(--forge-mobile-line-soft);
+        pointer-events: none;
+      }
+
+      .panels-container.mobile-active-assets .panels-row::before {
+        left: 50%;
+        right: 0;
+      }
+
+      .panels-container.mobile-active-synthesize .panels-row::before {
+        left: 0;
+        right: 50%;
+      }
+
+      .mobile-panel {
+        display: none !important;
+      }
+
+      .mobile-panel.is-mobile-active {
+        display: block !important;
       }
 
       .left-panels,
       .right-panel-stack {
         width: 100%;
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 14px;
+        display: contents;
+      }
+
+      .left-panels.is-mobile-active,
+      .right-panel-stack.is-mobile-active {
+        display: block;
+        height: 100%;
+      }
+
+      .left-panels.is-mobile-active {
+        height: 100%;
+        overflow-y: hidden;
+        padding: 14px 16px 12px;
+        background: transparent;
+      }
+
+      .left-panels.is-mobile-active .mobile-panel {
+        display: block !important;
+        height: auto;
+        max-height: none;
+        min-height: 0;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+        padding: 0;
+        overflow: visible;
+      }
+
+      .left-panels.is-mobile-active .mobile-panel + .mobile-panel {
+        margin-top: 11px;
+        padding-top: 0;
+        border-top: 0;
+        position: relative;
+      }
+
+      .left-panels.is-mobile-active .mobile-panel + .mobile-panel::before {
+        content: 'Fusion';
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0 0 9px;
+        color: #fff;
+        font: 800 15px/1.05 'Inter', system-ui, sans-serif;
+      }
+
+      .left-panels.is-mobile-active .mobile-panel + .mobile-panel::after {
+        content: '';
+        position: absolute;
+        top: 7px;
+        left: 54px;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--forge-mobile-line), rgba(224, 71, 60, 0.16) 82%, transparent);
+      }
+
+      .left-panels.is-mobile-active .panel-header {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        margin-bottom: 8px;
+        padding-bottom: 0;
+        border-bottom: 0;
+      }
+
+      .left-panels.is-mobile-active .step-number {
+        display: none;
+      }
+
+      .left-panels.is-mobile-active .panel-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        color: #fff;
+        font: 800 15px/1.05 'Inter', system-ui, sans-serif;
+      }
+
+      .left-panels.is-mobile-active .panel-title::after {
+        content: '';
+        height: 2px;
+        flex: 1 1 auto;
+        background: linear-gradient(90deg, var(--forge-mobile-line), rgba(224, 71, 60, 0.16) 82%, transparent);
+      }
+
+      .left-panels.is-mobile-active [data-mobile-panel="origin"] .panel-header::after {
+        display: none;
+        content: none;
+      }
+
+      .left-panels.is-mobile-active [data-mobile-panel="fusion"] .panel-header,
+      .left-panels.is-mobile-active [data-mobile-panel="fusion"] > .panel-description {
+        display: none;
+      }
+
+      .left-panels.is-mobile-active [data-mobile-panel="origin"] .panel-description {
+        margin: 7px 0 7px;
+        font-size: 10px;
+      }
+
+      .left-panels.is-mobile-active .upload-zone {
+        min-height: 0;
+        height: 86px;
+        padding: 0;
+        background: rgba(224, 71, 60, 0.18);
+      }
+
+      .left-panels.is-mobile-active .upload-icon {
+        width: 36px;
+        height: 36px;
+      }
+
+      .left-panels.is-mobile-active .fusion-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+        margin-bottom: 6px;
+      }
+
+      .left-panels.is-mobile-active .fusion-item {
+        aspect-ratio: auto;
+        height: 44px;
+        min-height: 44px;
+        padding: 5px 3px;
+      }
+
+      .left-panels.is-mobile-active .fusion-label {
+        font-size: 7px;
+      }
+
+      .left-panels.is-mobile-active .fusion-hint {
+        font-size: 6px;
+      }
+
+      .left-panels.is-mobile-active .fusion-status {
+        margin-top: 5px;
+        font-size: 9px;
+      }
+
+      .left-panels.is-mobile-active .fusion-progress {
+        margin-top: 5px;
+      }
+
+      .left-panels.is-mobile-active .panel-actions {
+        display: none;
+      }
+
+      .right-panel-stack.is-mobile-active {
+        position: relative;
+        padding: 14px 16px 82px;
+      }
+
+      .right-panel-stack.is-mobile-active .panel.right-panel {
+        padding: 0;
+        overflow: hidden;
+      }
+
+      .right-panel-stack.is-mobile-active .panel-header {
+        display: none;
+      }
+
+      .right-panel-stack.is-mobile-active .panel-description {
+        display: none;
+      }
+
+      .right-panel-stack.is-mobile-active .input-group {
+        margin-bottom: 6px;
+      }
+
+      .right-panel-stack.is-mobile-active .input-label {
+        margin-bottom: 2px;
+        font-size: 7px;
+      }
+
+      .right-panel-stack.is-mobile-active .input-select,
+      .right-panel-stack.is-mobile-active .input-field {
+        padding: 6px 8px;
+        font-size: 10px;
+      }
+
+      .right-panel-stack.is-mobile-active .input-field {
+        min-height: 40px;
+        height: 40px;
+        resize: none;
+      }
+
+      .right-panel-stack.is-mobile-active #negativePrompt {
+        min-height: 34px;
+        height: 34px;
+      }
+
+      .right-panel-stack.is-mobile-active .ai-generate-btn {
+        display: none;
       }
 
       .panel,
       .panel.right-panel {
         width: 100%;
+        height: 100%;
         max-height: none;
-        border-radius: 8px;
+        border-radius: 0;
         padding: 16px;
+        background: transparent;
+        border: 0;
+        box-shadow: none;
+        overflow-y: auto;
       }
 
       .panel-description {
@@ -1837,15 +2094,36 @@
         width: min(210px, 70vw);
       }
 
+      .render-btn.mobile-panel.is-mobile-active {
+        display: flex !important;
+        position: absolute;
+        left: 16px;
+        right: 16px;
+        bottom: 6px;
+        width: auto;
+        height: 58px;
+        margin: 0;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        border: 1px solid rgba(224, 71, 60, 0.28);
+        border-radius: 4px;
+        background: rgba(20, 8, 7, 0.58);
+      }
+
+      .render-btn.mobile-panel.is-mobile-active img {
+        width: 112px;
+      }
+
       .bottom-controls {
         position: relative;
         bottom: auto;
         left: auto;
         transform: none;
-        z-index: 1100;
-        width: min(100%, 680px);
-        margin: 16px auto 0;
-        padding: 0 14px;
+        z-index: 900;
+        width: var(--forge-mobile-shell);
+        margin: 14px auto 0;
+        padding: 0;
       }
 
       .recent-crafts {
@@ -1858,6 +2136,13 @@
         overflow-x: auto;
         padding-bottom: 2px;
         scroll-snap-type: x proximity;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+
+      .craft-items::-webkit-scrollbar {
+        width: 0;
+        height: 0;
       }
 
       .craft-item {
@@ -1882,46 +2167,24 @@
     }
 
     @media (max-width: 560px) {
-      header {
-        height: 52px;
-      }
-
-      .nav {
-        padding: 0 10px;
-      }
-
-      .brand span {
-        display: none;
-      }
-
-      .links {
-        flex: 1;
-        gap: 12px;
-      }
-
-      .links > .navlink[href="about.html"] {
-        display: none;
-      }
-
-      .dropdown-menu {
-        left: auto;
-        right: 0;
+      body {
+        --forge-mobile-shell: calc(100vw - 28px);
       }
 
       .forge-container {
         min-height: calc(100svh - 52px);
         margin-top: 52px;
+        padding-top: 38px;
       }
 
       .media-viewer {
-        width: calc(100vw - 28px);
-        margin-top: 62px;
+        width: var(--forge-mobile-shell);
       }
 
-      .furnace-header,
+      .mobile-forge-tabs,
       .panels-row,
       .bottom-controls {
-        width: 100%;
+        width: var(--forge-mobile-shell);
       }
 
       .panel-header {
@@ -2060,6 +2323,9 @@
     
     <!-- Media Viewer (sits in furnace opening - between furnace and furnacebg) -->
     <div class="media-viewer">
+      <div class="furnace-header">
+        <div class="header-label">The Forge - V.2</div>
+      </div>
       <div class="media-container">
         <div class="media-content" id="mediaContent">
           <div class="media-placeholder"></div>
@@ -2070,19 +2336,23 @@
     <!-- Main workspace -->
     <div class="workspace">
       <!-- Panels overlay -->
-      <div class="panels-container">
-        <!-- Header with labels -->
-        <div class="furnace-header">
-          <div class="header-label">The Forge - V.2</div>
-          
-        </div>
-        
+      <div class="panels-container mobile-active-assets">
         <!-- Side panels -->
+        <div class="mobile-forge-tabs" role="tablist" aria-label="Forge controls">
+          <button class="mobile-forge-tab" type="button" role="tab" aria-selected="true" data-mobile-tab="assets">
+            <span class="tab-index">1</span>
+            <span class="tab-label">Source</span>
+          </button>
+          <button class="mobile-forge-tab" type="button" role="tab" aria-selected="false" data-mobile-tab="synthesize">
+            <span class="tab-index">2</span>
+            <span class="tab-label">Synthesize</span>
+          </button>
+        </div>
         <div class="panels-row">
           <!-- Left panels -->
-          <div class="left-panels">
+          <div class="left-panels is-mobile-active" data-mobile-panel="assets">
             <!-- Origin Panel -->
-            <div class="panel">
+            <div class="panel mobile-panel" data-mobile-panel="origin">
               <div class="panel-header">
                 <div class="step-number">1</div>
                 <div class="panel-title">Origin</div>
@@ -2095,7 +2365,7 @@
             </div>
 
             <!-- Fusion Panel -->
-            <div class="panel">
+            <div class="panel mobile-panel" data-mobile-panel="fusion">
             <div class="panel-header">
               <div class="step-number">2</div>
               <div class="panel-title">Fusion</div>
@@ -2138,8 +2408,8 @@
           </div>
 
           <!-- Right Panel: Assemble -->
-          <div class="right-panel-stack">
-            <div class="panel right-panel">
+          <div class="right-panel-stack" data-mobile-panel="synthesize">
+            <div class="panel right-panel mobile-panel" data-mobile-panel="synthesize">
               <div class="panel-header">
                 <div class="step-number">3</div>
               <div class="panel-title">Synthesize</div>
@@ -2148,11 +2418,24 @@
               
               <div class="input-group">
                 <label class="input-label">Style <span class="field-check" id="styleCheck"></span></label>
-                <select class="input-select" id="styleSelect" disabled>
-                  <option>Cinematic</option>
-                  <option>Documentary</option>
-                  <option>Artistic</option>
-                  <option>Dramatic</option>
+                <select class="input-select" id="styleSelect">
+                  <option>Cinematic photography</option>
+                  <option>Photorealistic render</option>
+                  <option>Digital painting</option>
+                  <option>Anime style</option>
+                  <option>Comic book art</option>
+                  <option>Graphic novel style</option>
+                  <option>Oil painting</option>
+                  <option>Watercolor painting</option>
+                  <option>Surrealist art</option>
+                  <option>Cyberpunk art</option>
+                  <option>Synthwave aesthetic</option>
+                  <option>Pixel art</option>
+                  <option>Concept art</option>
+                  <option>Matte painting</option>
+                  <option>Unreal Engine 5 render</option>
+                  <option>Octane render</option>
+                  <option>Blender 3D render</option>
                 </select>
               </div>
               
@@ -2179,7 +2462,7 @@
                 </div>
               </div>
             </div>
-            <div class="render-btn is-disabled" role="button" tabindex="0" aria-label="Forge It" aria-disabled="true">
+            <div class="render-btn is-disabled mobile-panel" data-mobile-panel="synthesize" role="button" tabindex="0" aria-label="Forge It" aria-disabled="true">
               <img src="https://github.com/Neurofoundry/forge/blob/main/renderanvil.png?raw=true" alt="Forge It">
             </div>
           </div>
@@ -2357,6 +2640,9 @@
       const forgeResult2 = document.getElementById('forgeResult2');
       const forgeResult3 = document.getElementById('forgeResult3');
       const forgePopupClose = document.getElementById('forgePopupClose');
+      const panelsContainer = document.querySelector('.panels-container');
+      const mobileTabs = Array.from(document.querySelectorAll('.mobile-forge-tab'));
+      const mobilePanels = Array.from(document.querySelectorAll('.mobile-panel, .left-panels, .right-panel-stack'));
 
       const LEGACY_RECENT_KEY = 'forgeRecentRenders';
       const RECENT_KEY = 'forgeRecentThumbs';
@@ -2377,6 +2663,24 @@
         'Regulating Convergence...',
         'Analyzing the Artifacts...'
       ];
+
+      function setMobileForgeTab(tabName) {
+        mobileTabs.forEach((tab) => {
+          const selected = tab.dataset.mobileTab === tabName;
+          tab.setAttribute('aria-selected', String(selected));
+        });
+        mobilePanels.forEach((panel) => {
+          panel.classList.toggle('is-mobile-active', panel.dataset.mobilePanel === tabName);
+        });
+        if (panelsContainer) {
+          panelsContainer.classList.toggle('mobile-active-assets', tabName === 'assets');
+          panelsContainer.classList.toggle('mobile-active-synthesize', tabName === 'synthesize');
+        }
+      }
+
+      mobileTabs.forEach((tab) => {
+        tab.addEventListener('click', () => setMobileForgeTab(tab.dataset.mobileTab));
+      });
       let recentCache = [];
 
       let originImage = null;
@@ -2389,6 +2693,7 @@
       let sipContext = null;
       let mergedImage = null;
       let synthCaption = null;
+      let originCaption = null;
       let isProcessing = false;
       let isExtracting = false;
       let isResynthesizing = false;
@@ -2454,6 +2759,7 @@
 
       function updateFusionProgress() {
         if (!fusionProgressFill) return;
+        const progress = fusionProgressFill.closest('.fusion-progress');
         const total = 3;
         const done =
           (fusionSubject && fusionSubject.classList.contains('has-image') ? 1 : 0) +
@@ -2461,6 +2767,9 @@
           (fusionStyle && fusionStyle.classList.contains('has-image') ? 1 : 0);
         const percent = Math.round((done / total) * 100);
         fusionProgressFill.style.width = `${percent}%`;
+        if (progress) {
+          progress.classList.toggle('is-active', isProcessing);
+        }
       }
 
       function updateFusionChecklist() {
@@ -2671,7 +2980,7 @@
         }
         setFieldCheck(styleCheck, !!(styleSelect && styleSelect.value));
         setFieldCheck(positiveCheck, !!(positivePrompt && positivePrompt.value.trim()));
-        setFieldCheck(sceneCheck, !!(scenePrompt && scenePrompt.value.trim()));
+        setFieldCheck(sceneCheck, !!(originCaption || (scenePrompt && scenePrompt.value.trim())));
         updateRenderState();
       }
 
@@ -2698,7 +3007,7 @@
       }
 
       function hasOriginOrFusionReady() {
-        return !!(originImage || hasFusionChecks());
+        return !!(originCaption || hasFusionChecks());
       }
 
       function stashSubjectOutput() {
@@ -2708,6 +3017,36 @@
 
       function stashSceneOutput() {
         setHiddenValue(fusionSceneOutputText, acpContext);
+      }
+
+      function samePromptText(a, b) {
+        return (a || '').trim() === (b || '').trim();
+      }
+
+      function extractStyleLabel(text) {
+        const match = String(text || '').match(/style\s*:\s*([^\n\r]+)/i);
+        return match ? match[1].trim().replace(/[.]+$/, '') : '';
+      }
+
+      function selectStyleFromSip(text) {
+        if (!styleSelect) return;
+        const label = extractStyleLabel(text);
+        if (!label) return;
+        const normalized = label.toLowerCase();
+        const existing = Array.from(styleSelect.options).find((option) => {
+          const value = option.value.toLowerCase();
+          return value === normalized || value.includes(normalized) || normalized.includes(value);
+        });
+        if (existing) {
+          styleSelect.value = existing.value;
+        } else {
+          const option = document.createElement('option');
+          option.value = label;
+          option.textContent = label;
+          styleSelect.appendChild(option);
+          styleSelect.value = label;
+        }
+        updatePromptChecks();
       }
 
       function resetFusionState() {
@@ -2749,8 +3088,13 @@
 
       function clearOrigin() {
         originImage = null;
+        if (positivePrompt && originCaption && positivePrompt.value === originCaption) {
+          positivePrompt.value = '';
+        }
+        originCaption = null;
         updateUploadZoneLabel('');
         showPlaceholder();
+        updatePromptChecks();
       }
 
       function clearOriginAndReset() {
@@ -2763,13 +3107,29 @@
         if (!file) return;
         const dataUrl = await readFile(file);
         originImage = dataUrl;
+        originCaption = null;
         displayImage(dataUrl, false);
         updateUploadZoneLabel(file.name, dataUrl);
         enableFusion(false);
         resetFusionState();
         setFusionStatus('Fusion disabled. Origin image loaded.');
-        setStatus('Origin loaded. Ready to forge.', 'success');
-        updateRenderState();
+        setStatus('Captioning origin...', 'active');
+        setProcessing(true);
+        setSynthesizeLoading(true);
+        try {
+          originCaption = await runCaption(dataUrl);
+          if (positivePrompt) {
+            positivePrompt.value = originCaption;
+          }
+          setStatus('Origin caption ready. Press Forge.', 'success');
+        } catch (err) {
+          console.error(err);
+          setStatus(`Origin caption failed: ${err.message}`, 'error');
+        } finally {
+          setProcessing(false);
+          setSynthesizeLoading(false);
+          updatePromptChecks();
+        }
       }
 
       async function handleFusionFile(role, file) {
@@ -2919,18 +3279,46 @@
         scenePrompt.addEventListener('input', updatePromptChecks);
       }
 
-      const SIP_INSTRUCTION = `TASK: Identify the visual style of this image.
+      const ORIGIN_CAPTION_INSTRUCTION = `You are creating an SDXL-ready source caption for image-to-image fidelity.
 
-Output two lines only:
-Color palette: <short palette>
-Style: <short style>
-`;
+Describe the actual image as accurately as possible. Preserve the visible subject placement, pose, body orientation, camera angle, framing, scale, spatial layout, and major objects. Mention only visible details. Do not invent story, identity, symbolism, intent, mood, or unseen context. Keep it concrete and render-useful. Prioritize exact composition over poetic language. Output one compact paragraph only.`;
+
+      const CDP_INSTRUCTION = `You are CDP: Character/Component Detail Prompt.
+
+Describe ONLY the primary subject or object. Do not describe the background, setting, weather, smoke, fire, trees, buildings, terrain, lighting atmosphere, mood, emotional tone, color grading, or scene context unless it is physically on the subject itself.
+
+If the subject is a person, describe grounded visible facts: apparent gender presentation when visible, age range, body build, height impression, posture, hair color/style, skin tone if visible, facial hair, eyewear, mask/helmet, clothing items, materials, colors, gloves, boots, jewelry, straps, armor, accessories, weapons/tools held or worn, pose, and exact body orientation.
+
+If the subject is an object/vehicle/creature, describe its visible form, proportions, materials, surface finish, markings, parts, wear, attachments, and orientation.
+
+Be vivid but hard-grounded. No feelings. No story. No assumptions. No environmental details. Output one dense subject-only paragraph.`;
+
+      const ACP_INSTRUCTION = `You are ACP: Atmosphere/Context Prompt.
+
+Describe ONLY the setting, scene, environment, and visible atmospheric elements. Do not describe the primary subject, clothing, face, body, vehicle, creature, or object details. Do not discuss visual art style, color palette as a design concept, medium, rendering style, or genre.
+
+Name concrete scene facts: location type, terrain, architecture, background objects, fire, smoke, fog, rain, snow, debris, water, sky, horizon, interior/exterior layout, light sources, shadows, weather, spatial depth, and environmental activity. If fire is visible, say fire is visible. If smoke is visible, say smoke is visible. Prefer visible physical evidence over feelings.
+
+Avoid vague mood words like warm, cozy, ominous, peaceful, dramatic, unless tied to visible scene facts. Output one dense setting-only paragraph.`;
+
+      const SIP_INSTRUCTION = `You are SIP: Style/Image Properties.
+
+Ignore subject identity and scene content. Identify the visual style, medium, rendering approach, camera/framing language, and palette. Pick the closest usable style label for an SDXL prompt.
+
+Output exactly these lines:
+Color palette: <brief concrete palette>
+Style: <one concise style label>
+Camera/framing: <brief camera angle, shot type, or composition language>`;
+
+      const SYNTH_INSTRUCTION = `You are Synth. Merge CDP, ACP, and SIP into one compact SDXL render prompt.
+
+Target about 75 tokens. Prioritize the subject's most identity-defining visible details first, then the setting's concrete physical elements, then style/camera/palette. Remove duplicate ideas. Drop useless explanations, feelings, and obvious filler. Do not say things like wet water or hot fire. Keep only details that help image generation. No labels, no commentary, no bullets. Output one prompt only.`;
 
       async function runCdp(imageData) {
         const response = await fetch(`${FUSION_API}/cdp`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'x-auth-key': AUTH_KEY },
-          body: JSON.stringify({ image_base64: imageData })
+          body: JSON.stringify({ image_base64: imageData, instruction: CDP_INSTRUCTION })
         });
         if (!response.ok) throw new Error(`CDP failed: ${response.status}`);
         const data = await response.json();
@@ -2941,7 +3329,7 @@ Style: <short style>
         const response = await fetch(`${FUSION_API}/acp`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'x-auth-key': AUTH_KEY },
-          body: JSON.stringify({ image_base64: imageData })
+          body: JSON.stringify({ image_base64: imageData, instruction: ACP_INSTRUCTION })
         });
         if (!response.ok) throw new Error(`ACP failed: ${response.status}`);
         const data = await response.json();
@@ -2959,14 +3347,39 @@ Style: <short style>
         return data.sip || data.caption || data.output || '';
       }
 
+      async function runCaption(imageData) {
+        const response = await fetchWithTimeout(CAPTION_API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-auth-key': AUTH_KEY },
+          body: JSON.stringify({ image_base64: imageData, instruction: ORIGIN_CAPTION_INSTRUCTION })
+        }, RENDER_TIMEOUT_MS);
+        const bodyText = await response.text();
+        if (!response.ok) throw new Error(`Caption failed ${response.status}`);
+        let data;
+        try {
+          data = JSON.parse(bodyText);
+        } catch (err) {
+          throw new Error('Caption returned non-JSON');
+        }
+        const result = data.caption || data.generated_text || data.description || data.output || data.text || '';
+        if (!result || !result.trim()) throw new Error('Caption returned empty output');
+        return result.trim();
+      }
+
       async function runSynth(cdp, acp, sip) {
         if (!cdp || !acp || !sip) {
           throw new Error('Synth input missing one or more captions');
         }
-        const combined = `${cdp} ${acp} ${sip}`;
-        const compressionPrompt = `Compress the following into a single vivid image caption. Maximum 75 tokens. Output only the caption:
+        const compressionPrompt = `${SYNTH_INSTRUCTION}
 
-${combined}`;
+CDP:
+${cdp}
+
+ACP:
+${acp}
+
+SIP:
+${sip}`;
         const response = await fetch(SYNTH_API, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'x-auth-key': AUTH_KEY },
@@ -3106,6 +3519,9 @@ ${combined}`;
           if (scenePrompt && sipContext) {
             scenePrompt.value = sipContext;
           }
+          if (sipContext) {
+            selectStyleFromSip(sipContext);
+          }
           updatePromptChecks();
           if (cdpContext && acpContext && sipContext) {
             try {
@@ -3134,8 +3550,12 @@ ${combined}`;
         const parts = [];
         if (basePrompt) parts.push(basePrompt);
         if (styleSelect && styleSelect.value) parts.push(styleSelect.value);
-        if (positivePrompt && positivePrompt.value.trim()) parts.push(positivePrompt.value.trim());
-        if (scenePrompt && scenePrompt.value.trim()) parts.push(scenePrompt.value.trim());
+        if (positivePrompt && positivePrompt.value.trim() && !samePromptText(positivePrompt.value, basePrompt)) {
+          parts.push(positivePrompt.value.trim());
+        }
+        if (scenePrompt && scenePrompt.value.trim() && !samePromptText(scenePrompt.value, basePrompt)) {
+          parts.push(scenePrompt.value.trim());
+        }
         return parts.join(', ');
       }
 
@@ -3383,19 +3803,27 @@ ${combined}`;
           setProcessing(true);
           try {
             let basePrompt = '';
-          if (!originImage) {
-            if (!mergedImage || !cdpContext || !acpContext || !sipContext) {
-              throw new Error('Fusion not ready. Add subject and scene first.');
-            }
-            if (!synthCaption) {
-              synthCaption = await runSynth(cdpContext, acpContext, sipContext);
-            }
-            basePrompt = synthCaption || '';
-            if (positivePrompt && basePrompt) {
-              positivePrompt.value = basePrompt;
+            if (originImage) {
+              if (!originCaption) {
+                originCaption = await runCaption(originImage);
+              }
+              basePrompt = originCaption || '';
+              if (positivePrompt && basePrompt && !positivePrompt.value.trim()) {
+                positivePrompt.value = basePrompt;
+              }
+            } else {
+              if (!mergedImage || !cdpContext || !acpContext || !sipContext) {
+                throw new Error('Fusion not ready. Add subject and scene first.');
+              }
+              if (!synthCaption) {
+                synthCaption = await runSynth(cdpContext, acpContext, sipContext);
+              }
+              basePrompt = synthCaption || '';
+              if (positivePrompt && basePrompt && !positivePrompt.value.trim()) {
+                positivePrompt.value = basePrompt;
+              }
             }
             updatePromptChecks();
-          }
             const promptText = buildPrompt(basePrompt);
             const negativeText = getNegativePrompt();
             await renderImages(promptText, negativeText);
