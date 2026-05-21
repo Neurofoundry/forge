@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>The Forge - Neural Synthesis Engine | Neurofoundry</title>
-  <link rel="stylesheet" href="https://www.theneurofoundry.com/common/site-header.css?v=20260521-forge-nav2">
-  <link rel="stylesheet" href="https://www.theneurofoundry.com/common/site-footer.css?v=20260521-forge-nav2">
+  <link rel="stylesheet" href="https://www.theneurofoundry.com/common/site-header.css?v=20260521-auth-bridge">
+  <link rel="stylesheet" href="https://www.theneurofoundry.com/common/site-footer.css?v=20260521-auth-bridge">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     
@@ -2002,7 +2002,7 @@
   </div>
   <div class="page-background"></div>
   <div data-site-header></div>
-  <script src="https://www.theneurofoundry.com/common/site-header.js?v=20260521-forge-nav2" data-base="https://www.theneurofoundry.com/" data-root="https://www.theneurofoundry.com" data-current="forge"></script>
+  <script src="https://www.theneurofoundry.com/common/site-header.js?v=20260521-auth-bridge" data-base="https://www.theneurofoundry.com/" data-root="https://www.theneurofoundry.com" data-current="forge"></script>
 
   <div class="forge-container">
     <!-- Furnace background split into back (bg) and front (frame) -->
@@ -3183,13 +3183,13 @@ ${combined}`;
 
       async function loadCloudRecentRenders() {
         const token = getForgeAuthToken();
-        if (!token) return false;
+        const headers = token
+          ? { 'Authorization': `Bearer ${token}` }
+          : {};
 
         try {
           const response = await fetch(`${NF_API_BASE}/forge/renders`, {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            },
+            headers,
             credentials: 'include'
           });
           if (!response.ok) return false;
@@ -3243,27 +3243,28 @@ ${combined}`;
           thumbUrl
         };
         const token = getForgeAuthToken();
+        const headers = {
+          'Content-Type': 'application/json'
+        };
         if (token) {
-          try {
-            const response = await fetch(`${NF_API_BASE}/forge/renders`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-              },
-              credentials: 'include',
-              body: JSON.stringify({
-                imageDataUrl: dataUrl,
-                thumbDataUrl: thumbUrl
-              })
-            });
-            if (response.ok) {
-              const data = await response.json();
-              recentRender = normalizeRecentRender(data.data && data.data.render) || recentRender;
-            }
-          } catch (err) {
-            console.warn('Cloud render save failed', err);
+          headers.Authorization = `Bearer ${token}`;
+        }
+        try {
+          const response = await fetch(`${NF_API_BASE}/forge/renders`, {
+            method: 'POST',
+            headers,
+            credentials: 'include',
+            body: JSON.stringify({
+              imageDataUrl: dataUrl,
+              thumbDataUrl: thumbUrl
+            })
+          });
+          if (response.ok) {
+            const data = await response.json();
+            recentRender = normalizeRecentRender(data.data && data.data.render) || recentRender;
           }
+        } catch (err) {
+          console.warn('Cloud render save failed', err);
         }
         recentCache.unshift(recentRender);
         recentCache = recentCache.slice(0, MAX_RECENT);
@@ -3471,7 +3472,7 @@ ${combined}`;
       });
 </script>
   <div data-site-footer></div>
-  <script src="https://www.theneurofoundry.com/common/site-footer.js?v=20260521-forge-nav2" data-base="https://www.theneurofoundry.com/"></script>
+  <script src="https://www.theneurofoundry.com/common/site-footer.js?v=20260521-auth-bridge" data-base="https://www.theneurofoundry.com/"></script>
   <script src="shared/page-transitions.js"></script>
   <script src="shared/micro-interactions.js"></script>
   <script src="chatbot-component.js"></script>
