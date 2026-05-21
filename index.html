@@ -2322,6 +2322,17 @@
       const RENDER_API = 'https://nfcr-synthesize.onrender.com/features/4/render';
       const FUSION_API = 'https://prmptrndr.csirico9.workers.dev/fusion';
       const SYNTH_API = 'https://synth.csirico9.workers.dev';
+      const NF_API_BASE = (() => {
+        const hostname = window.location.hostname || '';
+        const protocol = window.location.protocol || '';
+        if (protocol === 'file:' || hostname === 'localhost' || hostname === '127.0.0.1') {
+          return 'http://localhost:3000/api';
+        }
+        if (hostname.endsWith('theneurofoundry.com')) {
+          return 'https://api.theneurofoundry.com/api';
+        }
+        return `${window.location.origin}/api`;
+      })();
       const AUTH_KEY = 'Tr1bXimgEnV1-sdbAI25';
 
       const uploadZone = document.querySelector('.upload-zone');
@@ -2367,8 +2378,12 @@
       const forgeResult3 = document.getElementById('forgeResult3');
       const forgePopupClose = document.getElementById('forgePopupClose');
 
-      const RECENT_KEY = 'forgeRecentRenders';
-      const MAX_RECENT = 16;
+      const LEGACY_RECENT_KEY = 'forgeRecentRenders';
+      const RECENT_KEY = 'forgeRecentThumbs';
+      const MAX_RECENT = 10;
+      const RECENT_THUMB_WIDTH = 256;
+      const RECENT_THUMB_HEIGHT = 144;
+      const RECENT_THUMB_QUALITY = 0.72;
       const AUTO_DOWNLOAD = true;
       const EXTRACT_TIMEOUT_MS = 45000;
       const FORGE_HOLO_ANIM_MS = 1400;
@@ -2542,6 +2557,7 @@
         if (forgeHoloAnim) {
           forgeHoloAnim.classList.remove('animate');
         }
+        clearForgeResultSlots();
         setProcessing(false);
         setStatus('Forge cancelled.', 'error');
       }
@@ -2569,6 +2585,12 @@
         if (forgePopupShell) {
           forgePopupShell.classList.add('results-started');
         }
+      }
+
+      function clearForgeResultSlots() {
+        if (forgeResult1) forgeResult1.removeAttribute('src');
+        if (forgeResult2) forgeResult2.removeAttribute('src');
+        if (forgeResult3) forgeResult3.removeAttribute('src');
       }
 
       function displayImage(imageSrc, useDegen) {
@@ -3142,23 +3164,136 @@ ${combined}`;
         return negativePrompt.value.trim();
       }
 
+      function getForgeAuthToken() {
+        try {
+          const auth = JSON.parse(localStorage.getItem('nf_auth') || 'null');
+          return auth && auth.token ? auth.token : '';
+        } catch {
+          return '';
+        }
+      }
+
+      function normalizeRecentRender(render) {
+        if (!render) return null;
+        if (typeof render === 'string') {
+          return {
+            url: render,
+            thumbUrl: render
+          };
+        }
+        const url = render.url || render.imageUrl || render.src || render.thumbUrl || '';
+        const thumbUrl = render.thumbUrl || render.thumbnailUrl || url;
+        return url && thumbUrl
+          ? {
+              ...render,
+              url,
+              thumbUrl
+            }
+          : null;
+      }
+
       function getRecentRenders() {
         try {
+          localStorage.removeItem(LEGACY_RECENT_KEY);
           const raw = localStorage.getItem(RECENT_KEY);
-          return raw ? JSON.parse(raw) : [];
+          return raw ? JSON.parse(raw).map(normalizeRecentRender).filter(Boolean) : [];
         } catch {
           return [];
         }
       }
 
-      function saveRender(dataUrl) {
+      async function loadCloudRecentRenders() {
+        const token = getForgeAuthToken();
+        if (!token) return false;
+
+        try {
+          const response = await fetch(`${NF_API_BASE}/forge/renders`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            },
+            credentials: 'include'
+          });
+          if (!response.ok) return false;
+          const data = await response.json();
+          const renders = (data.data && Array.isArray(data.data.renders))
+            ? data.data.renders.map(normalizeRecentRender).filter(Boolean)
+            : [];
+          if (!renders.length) return false;
+          recentCache = renders.slice(0, MAX_RECENT);
+          renderRecent(recentCache);
+          return true;
+        } catch (err) {
+          console.warn('Cloud recent load failed', err);
+          return false;
+        }
+      }
+
+      function makeRecentThumb(dataUrl) {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = RECENT_THUMB_WIDTH;
+            canvas.height = RECENT_THUMB_HEIGHT;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+              reject(new Error('Thumbnail canvas unavailable'));
+              return;
+            }
+            ctx.drawImage(img, 0, 0, RECENT_THUMB_WIDTH, RECENT_THUMB_HEIGHT);
+            resolve(canvas.toDataURL('image/jpeg', RECENT_THUMB_QUALITY));
+          };
+          img.onerror = () => reject(new Error('Thumbnail image failed'));
+          img.src = dataUrl;
+        });
+      }
+
+      async function saveRender(dataUrl) {
         if (!recentCache.length) {
           recentCache = getRecentRenders();
         }
-        recentCache.unshift(dataUrl);
+        let thumbUrl;
+        try {
+          thumbUrl = await makeRecentThumb(dataUrl);
+        } catch (err) {
+          console.error('Recent thumbnail failed', err);
+          return;
+        }
+        let recentRender = {
+          url: thumbUrl,
+          thumbUrl
+        };
+        const token = getForgeAuthToken();
+        if (token) {
+          try {
+            const response = await fetch(`${NF_API_BASE}/forge/renders`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              credentials: 'include',
+              body: JSON.stringify({
+                imageDataUrl: dataUrl,
+                thumbDataUrl: thumbUrl
+              })
+            });
+            if (response.ok) {
+              const data = await response.json();
+              recentRender = normalizeRecentRender(data.data && data.data.render) || recentRender;
+            }
+          } catch (err) {
+            console.warn('Cloud render save failed', err);
+          }
+        }
+        recentCache.unshift(recentRender);
         recentCache = recentCache.slice(0, MAX_RECENT);
         try {
-          localStorage.setItem(RECENT_KEY, JSON.stringify(recentCache));
+          const localThumbs = recentCache
+            .map((render) => normalizeRecentRender(render)?.thumbUrl)
+            .filter(Boolean)
+            .slice(0, MAX_RECENT);
+          localStorage.setItem(RECENT_KEY, JSON.stringify(localThumbs));
         } catch (err) {
           console.error('Recent save failed', err);
         }
@@ -3179,10 +3314,10 @@ ${combined}`;
         const items = recentContainer.querySelectorAll('.craft-item');
         const renders = rendersOverride || recentCache || getRecentRenders();
         items.forEach((item, idx) => {
-          const render = renders[idx];
+          const render = normalizeRecentRender(renders[idx]);
           if (render) {
-            item.style.backgroundImage = `url(${render})`;
-            item.dataset.src = render;
+            item.style.backgroundImage = `url(${render.thumbUrl})`;
+            item.dataset.src = render.url;
           } else {
             item.style.backgroundImage = '';
             item.dataset.src = '';
@@ -3233,7 +3368,7 @@ ${combined}`;
                 outputs.push(dataUrl);
                 updateForgeResultSlot(outputs.length, dataUrl);
                 displayImage(dataUrl, false);
-                saveRender(dataUrl);
+                await saveRender(dataUrl);
                 if (AUTO_DOWNLOAD) {
                   downloadImage(dataUrl, `forge_render_${Date.now()}_${i}.png`);
                 }
@@ -3345,6 +3480,7 @@ ${combined}`;
       window.addEventListener('load', async () => {
         recentCache = getRecentRenders();
         renderRecent(recentCache);
+        loadCloudRecentRenders();
         updateUploadZoneLabel('');
         updateRenderState();
         try {
