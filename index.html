@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>The Forge - Neural Synthesis Engine | Neurofoundry</title>
+  <link rel="stylesheet" href="https://www.theneurofoundry.com/common/site-header.css?v=20260521-forge">
+  <link rel="stylesheet" href="https://www.theneurofoundry.com/common/site-footer.css?v=20260521-forge">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     
@@ -1999,31 +2001,8 @@
     <div class="forge-holo-anim" id="forgeHoloAnim"></div>
   </div>
   <div class="page-background"></div>
-  <header>
-    <div class="nav">
-      <div class="brand">
-        <div class="brand-icon">N</div>
-        <span>NEUROFOUNDRY</span>
-      </div>
-      <nav class="links">
-        <a class="navlink" href="home.html">Home</a>
-        <a class="navlink" href="forge_final.html">Forge</a>
-        <div class="nav-item dropdown">
-          <button class="dropdown-toggle" type="button">
-            Archives <span class="dropdown-caret">v</span>
-          </button>
-          <div class="dropdown-menu">
-            <a href="technology.html">Technology</a>
-            <a href="downloads.html">Downloads</a>
-            <a href="button2.html">Manifesto</a>
-            <a href="neurofoundry-report.html">Report</a>
-          </div>
-        </div>
-        <a class="navlink" href="about.html">About</a>
-        <a class="btn primary" href="signup.html">Request Access</a>
-      </nav>
-    </div>
-  </header>
+  <div data-site-header></div>
+  <script src="https://www.theneurofoundry.com/common/site-header.js?v=20260521-forge" data-base="https://www.theneurofoundry.com/" data-root="https://www.theneurofoundry.com" data-current="forge"></script>
 
   <div class="forge-container">
     <!-- Furnace background split into back (bg) and front (frame) -->
@@ -3491,9 +3470,10 @@ ${combined}`;
         }
       });
 </script>
+  <div data-site-footer></div>
+  <script src="https://www.theneurofoundry.com/common/site-footer.js?v=20260521-forge" data-base="https://www.theneurofoundry.com/"></script>
   <script src="shared/page-transitions.js"></script>
   <script src="shared/micro-interactions.js"></script>
   <script src="chatbot-component.js"></script>
-  <script src="embers-effect.js"></script>
 </body>
 </html>
