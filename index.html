@@ -2984,6 +2984,7 @@
       const RECENT_THUMB_WIDTH = 256;
       const RECENT_THUMB_HEIGHT = 144;
       const RECENT_THUMB_QUALITY = 0.72;
+      const RECENT_STORE_KEY = 'forgeRecentRendersV2';
       const AUTO_DOWNLOAD = false;
       const EXTRACT_TIMEOUT_MS = 45000;
       const FORGE_HOLO_ANIM_MS = 1400;
@@ -4041,6 +4042,10 @@ ${sip}`;
       function getRecentRenders() {
         try {
           localStorage.removeItem(LEGACY_RECENT_KEY);
+          const storedRenders = localStorage.getItem(RECENT_STORE_KEY);
+          if (storedRenders) {
+            return JSON.parse(storedRenders).map(normalizeRecentRender).filter(Boolean);
+          }
           const raw = localStorage.getItem(RECENT_KEY);
           return raw ? JSON.parse(raw).map(normalizeRecentRender).filter(Boolean) : [];
         } catch {
@@ -4107,18 +4112,19 @@ ${sip}`;
           return;
         }
         let recentRender = {
-          url: thumbUrl,
+          url: dataUrl,
           thumbUrl
         };
         if (!hasForgeAuthSignal()) {
           recentCache.unshift(recentRender);
           recentCache = recentCache.slice(0, MAX_RECENT);
           try {
-            const localThumbs = recentCache
-              .map((render) => normalizeRecentRender(render)?.thumbUrl)
+            const localRenders = recentCache
+              .map(normalizeRecentRender)
               .filter(Boolean)
               .slice(0, MAX_RECENT);
-            localStorage.setItem(RECENT_KEY, JSON.stringify(localThumbs));
+            localStorage.setItem(RECENT_STORE_KEY, JSON.stringify(localRenders));
+            localStorage.setItem(RECENT_KEY, JSON.stringify(localRenders.map((render) => render.thumbUrl)));
           } catch (err) {
             console.error('Recent save failed', err);
           }
@@ -4152,11 +4158,12 @@ ${sip}`;
         recentCache.unshift(recentRender);
         recentCache = recentCache.slice(0, MAX_RECENT);
         try {
-          const localThumbs = recentCache
-            .map((render) => normalizeRecentRender(render)?.thumbUrl)
+          const localRenders = recentCache
+            .map(normalizeRecentRender)
             .filter(Boolean)
             .slice(0, MAX_RECENT);
-          localStorage.setItem(RECENT_KEY, JSON.stringify(localThumbs));
+          localStorage.setItem(RECENT_STORE_KEY, JSON.stringify(localRenders));
+          localStorage.setItem(RECENT_KEY, JSON.stringify(localRenders.map((render) => render.thumbUrl)));
         } catch (err) {
           console.error('Recent save failed', err);
         }
