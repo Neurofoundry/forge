@@ -155,8 +155,8 @@ Response shape:
 
 ## Current Known Side Paths
 
-- `api.theneurofoundry.com/api/forge/renders` is the cloud recent-render save path. It currently fails because auth/storage is not fully finished.
-- Local recent crafts still update using browser storage and generated thumbnails.
-- Auto-download currently creates a `data:image/png;base64,...` link. `shared/page-transitions.js` can interfere with that unless it ignores `download`, `data:`, and `blob:` links.
-- Missing `assets/loading/c2.png`, `c3.png`, and `c4.png` are loading-art path issues, not render-pipeline failures.
-
+- `api.theneurofoundry.com/api/forge/renders` is the authenticated cloud recent-render save path. It stores up to 10 renders per user through the Neurofoundry API/R2 route when auth and R2 are available.
+- Local Recent Crafts still update using browser storage and generated thumbnails, including for logged-out visitors.
+- Auto-download is disabled in the live UI. Render outputs display in the Forge result popup and Recent Crafts; authenticated cloud save is attempted separately.
+- `shared/page-transitions.js` ignores `download`, `data:`, and `blob:` links so manual/generated download links are not intercepted by page transitions.
+- Loading cog art is served from `assets/loading/c2.png`, `c3.png`, and `c4.png`.

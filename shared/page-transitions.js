@@ -20,11 +20,14 @@
     const href = link.getAttribute('href');
     if (!href) return;
     
-    // Skip external links, anchors, and special links
+    // Skip external links, anchors, downloads, and special links
     if (href.startsWith('http') || 
         href.startsWith('#') || 
+        href.startsWith('data:') ||
+        href.startsWith('blob:') ||
         href.startsWith('mailto:') ||
         href.startsWith('tel:') ||
+        link.hasAttribute('download') ||
         link.target === '_blank') {
       return;
     }

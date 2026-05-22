@@ -83,18 +83,18 @@ def get_rembg_session():
 # Serve static HTML files
 @app.route('/')
 def index():
-    """Serve the main test interface"""
-    html_path = os.path.join(STATIC_DIR, 'test_composition_pipeline.html')
+    """Serve the current Forge interface when running locally."""
+    html_path = os.path.join(STATIC_DIR, 'index.html')
     if os.path.exists(html_path):
         with open(html_path, 'r', encoding='utf-8') as f:
             return f.read()
     return '''
-    <h1>AI Composition Pipeline</h1>
-    <p>Server is running! Available test pages:</p>
+    <h1>Forge subject extractor</h1>
+    <p>Service is running. Available endpoints:</p>
     <ul>
-        <li><a href="/test_composition_pipeline.html">Full Pipeline Test</a></li>
-        <li><a href="/test_extraction.html">Extraction Test</a></li>
-        <li><a href="/test_forgeintegration.html">Forge Integration</a></li>
+        <li><a href="/health">Health</a></li>
+        <li>POST /extract</li>
+        <li>POST /compose (legacy/reference)</li>
     </ul>
     '''
 

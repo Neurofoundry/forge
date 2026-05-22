@@ -44,8 +44,7 @@
     }
     
     /* Background with furnace images layered */
-    /* Furnace background split into front (https://github.com/Neurofoundry/forge/blob/12a23c717a868465013f8044a72087b2c79ea6a7/furnace.png) and back (https://github.com/Neurofoundry/forge/blob/main/furnacebg.png)
-       so the media viewer can layer between them */
+    /* Furnace background split into front and back so the media viewer can layer between them */
     .furnace-front {
       position: absolute;
       top: 0;
@@ -53,7 +52,7 @@
       width: 100%;
       height: 100%;
       z-index: 450; /* sit just beneath the media viewer */
-      background-image: url('https://github.com/Neurofoundry/forge/blob/main/furnace.png?raw=true');
+      background-image: url('./furnace.png');
       background-size: 60% auto;
       background-position: center center;
       background-repeat: no-repeat;
@@ -74,7 +73,7 @@
       width: 100%;
       height: 100%;
       z-index: 0; /* place furnace background at the very bottom */
-      background-image: url('https://github.com/Neurofoundry/forge/blob/main/furnacebg.png?raw=true');
+      background-image: url('./furnacebg.png');
       background-size: cover;
       background-position: center center;
       background-repeat: no-repeat;
@@ -869,6 +868,9 @@
       opacity: 1;
     }
     .media-viewer.degen-active {
+      filter: none;
+    }
+    .media-viewer.degen-active .media-content {
       filter: url(#forge-wavy);
     }
     .svg-filters {
@@ -981,6 +983,74 @@
     }
     .forge-popup-overlay.active {
       display: flex;
+    }
+    .forge-info-overlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 22px;
+      background: rgba(7, 5, 4, 0.58);
+      backdrop-filter: blur(12px) saturate(1.08);
+      -webkit-backdrop-filter: blur(12px) saturate(1.08);
+      z-index: 2900;
+    }
+    .forge-info-overlay.active {
+      display: flex;
+    }
+    .forge-info-panel {
+      position: relative;
+      width: min(420px, calc(100vw - 44px));
+      min-height: 172px;
+      padding: 24px 26px 26px;
+      border: 1px solid rgba(224, 71, 60, 0.42);
+      border-radius: 8px;
+      background:
+        linear-gradient(180deg, rgba(21, 13, 12, 0.95), rgba(6, 6, 7, 0.97)),
+        url('./assets/widepanel.png') center / 100% 100% no-repeat;
+      box-shadow:
+        0 22px 70px rgba(0, 0, 0, 0.76),
+        inset 0 1px 0 rgba(255, 145, 128, 0.18),
+        inset 0 0 32px rgba(224, 71, 60, 0.08);
+      color: rgba(255, 238, 229, 0.9);
+    }
+    .forge-info-panel::before {
+      content: '';
+      position: absolute;
+      inset: 7px;
+      border: 1px solid rgba(224, 71, 60, 0.16);
+      border-radius: 5px;
+      pointer-events: none;
+    }
+    .forge-info-title {
+      margin: 0 34px 14px 0;
+      color: #ff5044;
+      font: 900 13px/1.1 'Inter', system-ui, sans-serif;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+    .forge-info-message {
+      margin: 0;
+      color: rgba(255, 238, 229, 0.82);
+      font: 600 13px/1.55 'Inter', system-ui, sans-serif;
+    }
+    .forge-info-close {
+      position: absolute;
+      top: 13px;
+      right: 13px;
+      width: 28px;
+      height: 28px;
+      border: 1px solid rgba(224, 71, 60, 0.32);
+      border-radius: 50%;
+      background: rgba(6, 6, 7, 0.72);
+      color: #ffb8ae;
+      font: 900 18px/1 'Inter', system-ui, sans-serif;
+      cursor: pointer;
+    }
+    .forge-info-close:hover {
+      border-color: rgba(224, 71, 60, 0.58);
+      color: #ffffff;
     }
     .forge-popup-shell {
       position: absolute;
@@ -1109,13 +1179,13 @@
       animation: forge-cog-spin 6s linear infinite;
     }
     #forgeCogLeft {
-      background-image: url('../../assets/loading/c2.png');
+      background-image: url('./assets/loading/c2.png');
     }
     #forgeCogCenter {
-      background-image: url('../../assets/loading/c3.png');
+      background-image: url('./assets/loading/c3.png');
     }
     #forgeCogRight {
-      background-image: url('../../assets/loading/c4.png');
+      background-image: url('./assets/loading/c4.png');
     }
     .forge-cog.cog-mid {
       width: 110px;
@@ -2511,6 +2581,13 @@
     </div>
     <div class="forge-holo-anim" id="forgeHoloAnim"></div>
   </div>
+  <div class="forge-info-overlay" id="forgeInfoOverlay" aria-hidden="true">
+    <div class="forge-info-panel" role="dialog" aria-modal="true" aria-labelledby="forgeInfoTitle">
+      <button class="forge-info-close" id="forgeInfoClose" type="button" aria-label="Close">×</button>
+      <h2 class="forge-info-title" id="forgeInfoTitle"></h2>
+      <p class="forge-info-message" id="forgeInfoMessage"></p>
+    </div>
+  </div>
   <div class="page-background"></div>
   <div data-site-header></div>
   <script src="https://www.theneurofoundry.com/common/site-header.js?v=20260521-forge-login-return" data-base="https://www.theneurofoundry.com/" data-root="https://www.theneurofoundry.com" data-current="forge"></script>
@@ -2715,7 +2792,7 @@
               </div>
             </div>
             <div class="render-btn is-disabled mobile-panel" data-mobile-panel="synthesize" role="button" tabindex="0" aria-label="Forge It" aria-disabled="true">
-              <img src="https://github.com/Neurofoundry/forge/blob/main/renderanvil.png?raw=true" alt="Forge It">
+              <img src="./renderanvil.png" alt="Forge It">
             </div>
           </div>
         </div>
@@ -2892,6 +2969,10 @@
       const forgeResult2 = document.getElementById('forgeResult2');
       const forgeResult3 = document.getElementById('forgeResult3');
       const forgePopupClose = document.getElementById('forgePopupClose');
+      const forgeInfoOverlay = document.getElementById('forgeInfoOverlay');
+      const forgeInfoTitle = document.getElementById('forgeInfoTitle');
+      const forgeInfoMessage = document.getElementById('forgeInfoMessage');
+      const forgeInfoClose = document.getElementById('forgeInfoClose');
       const panelsContainer = document.querySelector('.panels-container');
       const mobileTabs = Array.from(document.querySelectorAll('.mobile-forge-tab'));
       const mobilePanels = Array.from(document.querySelectorAll('.mobile-panel, .left-panels, .right-panel-stack'));
@@ -2902,7 +2983,7 @@
       const RECENT_THUMB_WIDTH = 256;
       const RECENT_THUMB_HEIGHT = 144;
       const RECENT_THUMB_QUALITY = 0.72;
-      const AUTO_DOWNLOAD = true;
+      const AUTO_DOWNLOAD = false;
       const EXTRACT_TIMEOUT_MS = 45000;
       const FORGE_HOLO_ANIM_MS = 1400;
       const FORGE_MESSAGE_INTERVAL_MS = 2400;
@@ -2934,15 +3015,41 @@
         tab.addEventListener('click', () => setMobileForgeTab(tab.dataset.mobileTab));
       });
 
+      function showForgeInfo(kind) {
+        if (!forgeInfoOverlay || !forgeInfoTitle || !forgeInfoMessage) return;
+        const isOrigin = kind === 'origin';
+        forgeInfoTitle.textContent = isOrigin ? 'Origin Source' : 'Fusion Source';
+        forgeInfoMessage.textContent = isOrigin
+          ? 'Origin uses one image as the source. Forge captions it for prompt accuracy, then renders from that caption.'
+          : 'Fusion combines a subject image with a scene image. Forge analyzes subject, scene, and merged preview before rendering.';
+        forgeInfoOverlay.classList.add('active');
+        forgeInfoOverlay.setAttribute('aria-hidden', 'false');
+      }
+
+      function closeForgeInfo() {
+        if (!forgeInfoOverlay) return;
+        forgeInfoOverlay.classList.remove('active');
+        forgeInfoOverlay.setAttribute('aria-hidden', 'true');
+      }
+
       document.querySelectorAll('.mobile-info-btn').forEach((button) => {
         button.addEventListener('click', (event) => {
           event.preventDefault();
           event.stopPropagation();
-          const message = button.dataset.info === 'origin'
-            ? 'Origin uses one image as the source. Forge captions it for prompt accuracy, then renders from that caption.'
-            : 'Fusion combines a subject image with a scene image. Forge analyzes subject, scene, and merged preview before rendering.';
-          window.alert(message);
+          showForgeInfo(button.dataset.info);
         });
+      });
+
+      if (forgeInfoClose) {
+        forgeInfoClose.addEventListener('click', closeForgeInfo);
+      }
+      if (forgeInfoOverlay) {
+        forgeInfoOverlay.addEventListener('click', (event) => {
+          if (event.target === forgeInfoOverlay) closeForgeInfo();
+        });
+      }
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') closeForgeInfo();
       });
 
       let recentCache = [];
@@ -2960,6 +3067,9 @@
       let originCaption = null;
       let isProcessing = false;
       let isExtracting = false;
+      let isAnalyzingScene = false;
+      let isPreparingFusion = false;
+      let fusionPipelineRunning = false;
       let isResynthesizing = false;
       let forgePopupTimer = null;
       let forgeMessageTimer = null;
@@ -2992,10 +3102,19 @@
       }
 
       function maybeAutoFusion() {
-        if (isProcessing) return;
-        const ready = extractedSubject && cdpContext && backgroundImage && acpContext;
+        if (isProcessing || fusionPipelineRunning) return;
+        const ready = extractedSubject && backgroundImage && !isExtracting && !isAnalyzingScene;
         if (!ready) return;
         runFusionPipeline();
+      }
+
+      function maybeShowFusionPreparation() {
+        if (!subjectImage || !backgroundImage || hasFusionChecks()) return;
+        isPreparingFusion = true;
+        setMobileForgeTab('synthesize');
+        setSynthesizeLoading(true);
+        setStatus('Preparing fusion...', 'active');
+        setFusionStatus('Preparing synthesis...');
       }
 
       function updateRenderState() {
@@ -3304,12 +3423,6 @@
         });
         if (existing) {
           styleSelect.value = existing.value;
-        } else {
-          const option = document.createElement('option');
-          option.value = label;
-          option.textContent = label;
-          styleSelect.appendChild(option);
-          styleSelect.value = label;
         }
         updatePromptChecks();
       }
@@ -3331,6 +3444,9 @@
           scenePrompt.value = '';
         }
         synthCaption = null;
+        isAnalyzingScene = false;
+        isPreparingFusion = false;
+        fusionPipelineRunning = false;
         clearFusionImage(fusionSubject);
         clearFusionImage(fusionScene);
         clearFusionImage(fusionStyle);
@@ -3341,6 +3457,7 @@
         if (fusionSceneInput) fusionSceneInput.value = '';
         if (fusionStyleInput) fusionStyleInput.value = '';
         setFusionStatus('Waiting for subject + scene.');
+        setSynthesizeLoading(false);
         updateRenderState();
         updatePromptChecks();
         updateFusionClear();
@@ -3426,7 +3543,8 @@
           setHiddenValue(fusionSubjectOutputText, '');
           updatePromptChecks();
           updateRenderState();
-          await extractSubject();
+          maybeShowFusionPreparation();
+          extractSubject();
           return;
         } else if (role === 'scene') {
           const prevSip = sipContext;
@@ -3445,7 +3563,8 @@
           setHiddenValue(fusionSceneOutputText, '');
           updatePromptChecks();
           updateRenderState();
-          await processScene();
+          maybeShowFusionPreparation();
+          processScene();
           return;
         } else if (role === 'style') {
           styleImage = dataUrl;
@@ -3697,14 +3816,22 @@ ${sip}`;
           }
           setFusionStatus('Subject extracted.');
           updateRenderState();
-          maybeAutoFusion();
+        } catch (err) {
+          console.error(err);
+          setFusionStatus(`Extraction failed: ${err.message}`);
+          setStatus(`Extraction failed: ${err.message}`, 'error');
+          isPreparingFusion = false;
+          setSynthesizeLoading(false);
         } finally {
           isExtracting = false;
+          maybeAutoFusion();
         }
       }
 
       async function processScene() {
         if (!backgroundImage) return;
+        if (isAnalyzingScene) return;
+        isAnalyzingScene = true;
         setFusionStatus('Analyzing scene...');
         try {
           acpContext = await runAcp(backgroundImage);
@@ -3719,6 +3846,7 @@ ${sip}`;
           markFusionReady(fusionScene);
         }
         updateRenderState();
+        isAnalyzingScene = false;
         maybeAutoFusion();
       }
 
@@ -3748,13 +3876,29 @@ ${sip}`;
       }
 
       async function runFusionPipeline() {
-        if (isProcessing) return;
+        if (isProcessing || fusionPipelineRunning) return;
         if (!subjectImage || !backgroundImage) return;
+        fusionPipelineRunning = true;
+        isPreparingFusion = false;
+        setMobileForgeTab('synthesize');
         setProcessing(true);
         setSynthesizeLoading(true);
         try {
           if (!extractedSubject) {
             await extractSubject();
+          }
+          if (extractedSubject && !cdpContext) {
+            try {
+              cdpContext = await runCdp(extractedSubject);
+            } catch (err) {
+              console.error(err);
+              cdpContext = '';
+              setFusionStatus('CDP failed. Continuing...');
+            }
+            stashSubjectOutput();
+            if (cdpContext) {
+              markFusionReady(fusionSubject);
+            }
           }
           if (!acpContext) {
             try {
@@ -3806,6 +3950,7 @@ ${sip}`;
           setFusionStatus(`Fusion failed: ${err.message}`);
           setStatus(`Fusion failed: ${err.message}`, 'error');
         } finally {
+          fusionPipelineRunning = false;
           setProcessing(false);
           setSynthesizeLoading(false);
         }
@@ -3838,6 +3983,10 @@ ${sip}`;
         }
       }
 
+      function hasForgeAuthSignal() {
+        return !!getForgeAuthToken() || !!document.querySelector('.nf-profile-link');
+      }
+
       function normalizeRecentRender(render) {
         if (!render) return null;
         if (typeof render === 'string') {
@@ -3868,6 +4017,7 @@ ${sip}`;
       }
 
       async function loadCloudRecentRenders() {
+        if (!hasForgeAuthSignal()) return false;
         const token = getForgeAuthToken();
         const headers = token
           ? { 'Authorization': `Bearer ${token}` }
@@ -3928,6 +4078,21 @@ ${sip}`;
           url: thumbUrl,
           thumbUrl
         };
+        if (!hasForgeAuthSignal()) {
+          recentCache.unshift(recentRender);
+          recentCache = recentCache.slice(0, MAX_RECENT);
+          try {
+            const localThumbs = recentCache
+              .map((render) => normalizeRecentRender(render)?.thumbUrl)
+              .filter(Boolean)
+              .slice(0, MAX_RECENT);
+            localStorage.setItem(RECENT_KEY, JSON.stringify(localThumbs));
+          } catch (err) {
+            console.error('Recent save failed', err);
+          }
+          renderRecent(recentCache);
+          return;
+        }
         const token = getForgeAuthToken();
         const headers = {
           'Content-Type': 'application/json'
@@ -4154,7 +4319,7 @@ ${sip}`;
       window.addEventListener('load', async () => {
         recentCache = getRecentRenders();
         renderRecent(recentCache);
-        loadCloudRecentRenders();
+        window.setTimeout(loadCloudRecentRenders, 1200);
         updateUploadZoneLabel('');
         updateRenderState();
         try {

@@ -1,83 +1,58 @@
-# 🎨 AI Image Fusion - Quick Start Guide
+# Forge Quick Start
 
-## What You Need
+Forge's current public UI is `index.html`, served at:
 
-**1 Service Only:**
-- `subject_extractor.py` (Port 5001)
-- Your SDXL proxy (Port 8080) - should already be running
+```text
+https://forge.theneurofoundry.com/
+```
 
-## Quick Start
+## Current Live Flow
 
-### Step 1: Start Service
-```bash
-# Double-click:
-start_extractor.bat
+- Origin path: upload one image, caption it through `nfcr-synthesize`, then render from the generated prompt.
+- Fusion path: upload subject and scene images, extract/caption/analyze them through the configured external services, then render from the synthesized prompt.
+- Recent Crafts: keep up to 10 local thumbnails in browser storage, with optional cloud save/load for authenticated users.
 
-# OR command line:
+## Local Static UI Check
+
+From this folder:
+
+```powershell
+python -m http.server 4179 --bind 127.0.0.1
+```
+
+Open:
+
+```text
+http://127.0.0.1:4179/index.html
+```
+
+## Subject Extraction Service
+
+Run this only when testing the extraction service directly:
+
+```powershell
 python subject_extractor.py
 ```
 
-### Step 2: Test Fusion
-Open in browser: **`test_forgeintegration.html`**
+Local endpoint:
 
-Go to **Fusion Panel (#2)** and:
-1. Upload **Subject** image (background auto-removes)
-2. Upload **Scene** image
-3. Upload **Style** image
-4. Click **"⚡ Compose Images"**
-
-## How It Works
-
-```
-1. Subject → rembg removes BG → SDXL img2img → Result A
-2. Scene → SDXL img2img → Result B
-3. Style → SDXL img2img → Result C
-4. Layer A + B + C together → FINAL IMAGE
+```text
+http://127.0.0.1:5001/health
 ```
 
-**Each image gets AI-processed through your Cloudflare Worker!**
+Production Forge uses:
 
-## Files You Need
+```text
+https://extract.theneurofoundry.com
+```
 
-### Core Files:
-- ✅ `subject_extractor.py` - Main service
-- ✅ `requirements.txt` - Dependencies
-- ✅ `start_extractor.bat` - Quick launcher
-- ✅ `test_forgeintegration.html` - Your main UI
+## Legacy Reference Files
 
-### Optional Test Files:
-- `test_composition_pipeline.html` - Standalone test UI
-- `test_extraction.html` - Background removal test
+The older ControlNet/composition files remain reference material unless explicitly revived:
 
-### Ignore These (old test files):
-- ❌ `controlnet_service.py` - Not needed anymore
-- ❌ `controlnet_integration.py` - Not needed
-- ❌ `START_ALL_SERVICES.bat` - Old
-- ❌ `START_EVERYTHING.bat` - Old
-- ❌ `start_controlnet.bat` - Not needed
-- ❌ `sdxl_fusion_endpoint.py` - Reference only
-
-## Troubleshooting
-
-**"Composition failed"?**
-- Make sure `localhost:8080` (SDXL proxy) is running
-- Check the terminal logs for detailed error
-
-**"Service not starting"?**
-- Run: `pip install -r requirements.txt`
-- Check if port 5001 is already in use
-
-**Slow performance?**
-- Normal! 3 img2img passes take ~60-90 seconds total
-- Each pass is ~20-30 seconds through Cloudflare Worker
-
-## For Production
-
-When deploying online:
-1. Deploy `subject_extractor.py` to your server
-2. Update Cloudflare Worker URL in the code (currently localhost:8080)
-3. Done! Frontend calls your deployed endpoint
-
----
-
-**Need help?** Check the detailed logs in the terminal window.
+- `controlnet_service.py`
+- `controlnet_integration.py`
+- `START_ALL_SERVICES.bat`
+- `START_EVERYTHING.bat`
+- `start_controlnet.bat`
+- `sdxl_fusion_endpoint.py`
