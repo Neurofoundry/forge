@@ -3390,8 +3390,22 @@
         );
       }
 
+      function hasFusionInputs() {
+        return !!(subjectImage && backgroundImage);
+      }
+
+      function hasManualFusionPrompt() {
+        return !!(
+          hasFusionInputs() &&
+          positivePrompt &&
+          positivePrompt.value.trim() &&
+          scenePrompt &&
+          scenePrompt.value.trim()
+        );
+      }
+
       function hasOriginOrFusionReady() {
-        return !!(originCaption || hasFusionChecks());
+        return !!(originCaption || hasFusionChecks() || hasManualFusionPrompt());
       }
 
       function stashSubjectOutput() {
@@ -3425,6 +3439,15 @@
           styleSelect.value = existing.value;
         }
         updatePromptChecks();
+      }
+
+      function readAiText(data, keys) {
+        if (!data || typeof data !== 'object') return '';
+        for (const key of keys) {
+          const value = data[key];
+          if (typeof value === 'string' && value.trim()) return value.trim();
+        }
+        return '';
       }
 
       function resetFusionState() {
@@ -3706,7 +3729,7 @@ Target about 75 tokens. Prioritize the subject's most identity-defining visible 
         });
         if (!response.ok) throw new Error(`CDP failed: ${response.status}`);
         const data = await response.json();
-        return data.cdp || data.caption || data.output || '';
+        return readAiText(data, ['cdp', 'caption', 'output', 'result', 'text', 'generated_text', 'description']);
       }
 
       async function runAcp(imageData) {
@@ -3717,7 +3740,7 @@ Target about 75 tokens. Prioritize the subject's most identity-defining visible 
         });
         if (!response.ok) throw new Error(`ACP failed: ${response.status}`);
         const data = await response.json();
-        return data.acp || data.caption || data.output || '';
+        return readAiText(data, ['acp', 'caption', 'output', 'result', 'text', 'generated_text', 'description']);
       }
 
       async function runSip(imageData) {
@@ -3728,7 +3751,7 @@ Target about 75 tokens. Prioritize the subject's most identity-defining visible 
         });
         if (!response.ok) throw new Error(`SIP failed: ${response.status}`);
         const data = await response.json();
-        return data.sip || data.caption || data.output || '';
+        return readAiText(data, ['sip', 'caption', 'output', 'result', 'text', 'generated_text', 'description']);
       }
 
       async function runCaption(imageData) {
@@ -3836,6 +3859,9 @@ ${sip}`;
         try {
           acpContext = await runAcp(backgroundImage);
           setFusionStatus('Scene analyzed.');
+          if (scenePrompt && acpContext && !scenePrompt.value.trim()) {
+            scenePrompt.value = acpContext;
+          }
         } catch (err) {
           console.error(err);
           acpContext = '';
@@ -3845,6 +3871,7 @@ ${sip}`;
         if (acpContext) {
           markFusionReady(fusionScene);
         }
+        updatePromptChecks();
         updateRenderState();
         isAnalyzingScene = false;
         maybeAutoFusion();
@@ -3926,7 +3953,11 @@ ${sip}`;
             setFusionStatus('SIP failed. Continuing...');
           }
           if (scenePrompt && sipContext) {
-            scenePrompt.value = sipContext;
+            if (acpContext && samePromptText(scenePrompt.value, acpContext)) {
+              scenePrompt.value = `${acpContext}\n\n${sipContext}`;
+            } else if (!scenePrompt.value.trim()) {
+              scenePrompt.value = sipContext;
+            }
           }
           if (sipContext) {
             selectStyleFromSip(sipContext);
@@ -4242,15 +4273,18 @@ ${sip}`;
                 positivePrompt.value = basePrompt;
               }
             } else {
-              if (!mergedImage || !cdpContext || !acpContext || !sipContext) {
+              if (mergedImage && cdpContext && acpContext && sipContext) {
+                if (!synthCaption) {
+                  synthCaption = await runSynth(cdpContext, acpContext, sipContext);
+                }
+                basePrompt = synthCaption || '';
+                if (positivePrompt && basePrompt && !positivePrompt.value.trim()) {
+                  positivePrompt.value = basePrompt;
+                }
+              } else if (hasManualFusionPrompt()) {
+                basePrompt = positivePrompt.value.trim();
+              } else {
                 throw new Error('Fusion not ready. Add subject and scene first.');
-              }
-              if (!synthCaption) {
-                synthCaption = await runSynth(cdpContext, acpContext, sipContext);
-              }
-              basePrompt = synthCaption || '';
-              if (positivePrompt && basePrompt && !positivePrompt.value.trim()) {
-                positivePrompt.value = basePrompt;
               }
             }
             updatePromptChecks();
