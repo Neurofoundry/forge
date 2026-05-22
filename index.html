@@ -563,6 +563,10 @@
       background: linear-gradient(90deg, rgba(178, 28, 28, 0.6), rgba(224, 71, 60, 0.9));
       transition: width 0.3s ease;
     }
+    .mobile-info-btn,
+    .mobile-upload-btn {
+      display: none;
+    }
     .panel-actions {
       display: flex;
       gap: 6px;
@@ -1661,6 +1665,7 @@
         background: transparent;
         overflow: visible;
         z-index: 4;
+        column-gap: 0;
       }
 
       .mobile-forge-tabs::before {
@@ -1689,10 +1694,10 @@
         appearance: none;
         position: relative;
         z-index: 1;
-        border: 1px solid rgba(224, 71, 60, 0.16);
-        border-bottom-color: var(--forge-mobile-line-soft);
-        border-right: 1px solid rgba(224, 71, 60, 0.1);
-        background: rgba(18, 7, 6, 0.58);
+        border: 0;
+        border-bottom-color: transparent;
+        border-right: 0;
+        background: transparent;
         color: rgba(255, 238, 229, 0.56);
         height: 52px;
         font: 750 14px/1 'Inter', system-ui, sans-serif;
@@ -1705,6 +1710,10 @@
         padding: 0 14px;
         box-shadow: none;
         transition: color 0.16s ease, background 0.16s ease, opacity 0.16s ease;
+      }
+
+      .mobile-forge-tab + .mobile-forge-tab {
+        margin-left: -50px;
       }
 
       .mobile-forge-tab .tab-index {
@@ -1732,29 +1741,17 @@
 
       .mobile-forge-tab[aria-selected="true"] {
         z-index: 5;
-        background: linear-gradient(180deg, rgba(11, 9, 9, 0.99), rgba(4, 4, 4, 0.99));
+        background: url('./assets/activetab.png') center / 100% 100% no-repeat;
         color: #ffffff;
-        border-color: var(--forge-mobile-line-soft);
+        border-color: transparent;
         border-bottom-color: transparent;
         opacity: 1;
-        box-shadow:
-          inset 0 2px 0 var(--forge-mobile-line),
-          inset 1px 0 0 rgba(255, 119, 104, 0.2),
-          inset -1px 0 0 rgba(224, 71, 60, 0.2),
-          inset -18px 0 24px rgba(224, 71, 60, 0.08),
-          inset 0 -18px 22px rgba(0, 0, 0, 0.32),
-          0 8px 18px rgba(0, 0, 0, 0.26);
+        box-shadow: none;
       }
 
       .mobile-forge-tab[aria-selected="true"]::before {
-        content: '';
-        position: absolute;
-        top: 4px;
-        right: 0;
-        bottom: 8px;
-        width: 1px;
-        background: linear-gradient(180deg, rgba(255, 119, 104, 0.34), rgba(224, 71, 60, 0.08));
-        pointer-events: none;
+        content: none;
+        display: none;
       }
 
       .mobile-forge-tab[aria-selected="true"]::after {
@@ -1762,9 +1759,12 @@
         position: absolute;
         left: 0;
         right: 0;
-        bottom: -2px;
-        height: 3px;
-        background: rgba(4, 4, 4, 0.99);
+        bottom: -24px;
+        height: 28px;
+        background-image: url('./frame/tab_blend.png');
+        background-size: 100% 100%;
+        background-repeat: no-repeat;
+        background-position: center bottom;
         pointer-events: none;
       }
 
@@ -1779,28 +1779,15 @@
 
       .mobile-forge-tab[aria-selected="false"] {
         border-top-color: transparent;
-        background:
-          linear-gradient(180deg, rgba(14, 12, 12, 0.82), rgba(5, 5, 5, 0.76)),
-          rgba(18, 7, 6, 0.5);
-        opacity: 0.54;
-        filter: grayscale(0.82);
-        box-shadow:
-          inset 1px 0 0 rgba(255, 255, 255, 0.06),
-          inset -1px 0 0 rgba(224, 71, 60, 0.1),
-          inset 18px 0 28px rgba(0, 0, 0, 0.22),
-          inset 0 -18px 24px rgba(0, 0, 0, 0.22);
+        background: url('./assets/inactivetab.png') center / 100% 100% no-repeat;
+        opacity: 1;
+        filter: none;
+        box-shadow: none;
       }
 
       .mobile-forge-tab[aria-selected="false"]::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        right: 0;
-        top: 5px;
-        height: 2px;
-        background: rgba(224, 71, 60, 0.24);
-        box-shadow: 0 0 8px rgba(224, 71, 60, 0.12);
-        pointer-events: none;
+        content: none;
+        display: none;
       }
 
       .mobile-forge-tab[aria-selected="true"] .tab-index {
@@ -1824,15 +1811,21 @@
         display: block;
         height: clamp(350px, 43svh, 390px);
         overflow: hidden;
-        border: 1px solid var(--forge-mobile-line-soft);
+        border: 0;
         border-top: 0;
-        background: linear-gradient(180deg, rgba(4, 4, 4, 0.98), rgba(5, 3, 3, 0.96));
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(224, 71, 60, 0.15);
+        background:
+          url('./assets/largepanel.png') center / 100% 100% no-repeat,
+          linear-gradient(180deg, rgba(17, 13, 12, 0.98), rgba(4, 4, 4, 0.98));
+        box-shadow:
+          0 12px 40px rgba(0, 0, 0, 0.85),
+          inset 0 1px 0 rgba(255, 120, 105, 0.12),
+          inset 0 0 34px rgba(0, 0, 0, 0.72);
         pointer-events: auto;
       }
 
       .panels-row::before {
-        content: '';
+        content: none;
+        display: none;
         position: absolute;
         top: 0;
         height: 1px;
@@ -1840,14 +1833,29 @@
         pointer-events: none;
       }
 
+      .panels-row::after {
+        content: none;
+        display: none;
+      }
+
       .panels-container.mobile-active-assets .panels-row::before {
         left: 50%;
         right: 0;
       }
 
+      .panels-container.mobile-active-assets .panels-row::after {
+        left: 0;
+        right: 50%;
+      }
+
       .panels-container.mobile-active-synthesize .panels-row::before {
         left: 0;
         right: 50%;
+      }
+
+      .panels-container.mobile-active-synthesize .panels-row::after {
+        left: 50%;
+        right: 0;
       }
 
       .mobile-panel {
@@ -1873,8 +1881,10 @@
       .left-panels.is-mobile-active {
         height: 100%;
         overflow-y: hidden;
-        padding: 14px 16px 12px;
+        padding: 13px 15px 12px;
         background: transparent;
+        outline: 0;
+        box-shadow: none;
       }
 
       .left-panels.is-mobile-active .mobile-panel {
@@ -1890,11 +1900,87 @@
         overflow: visible;
       }
 
+      .left-panels.is-mobile-active [data-mobile-panel="origin"] {
+        display: grid !important;
+        grid-template-columns: 102px minmax(0, 1fr);
+        grid-template-rows: auto 36px 48px;
+        column-gap: 18px;
+        align-items: stretch;
+        position: relative;
+      }
+
+      .left-panels.is-mobile-active [data-mobile-panel="origin"]::before {
+        display: none;
+        content: none;
+      }
+
+      .left-panels.is-mobile-active .mobile-info-btn {
+        position: absolute;
+        right: 7px;
+        width: 16px;
+        height: 16px;
+        border: 0;
+        border-radius: 50%;
+        background: #ffffff;
+        color: #2b0b08;
+        font: 900 11px/1 'Inter', system-ui, sans-serif;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        cursor: pointer;
+        z-index: 4;
+        box-shadow:
+          0 0 0 1px rgba(224, 71, 60, 0.78),
+          0 0 10px rgba(224, 71, 60, 0.58),
+          0 0 7px rgba(255, 255, 255, 0.38);
+      }
+
+      .left-panels.is-mobile-active [data-info="origin"] {
+        top: 2px;
+        right: 7px;
+      }
+
+      .left-panels.is-mobile-active [data-info="fusion"] {
+        top: 1px;
+        right: 7px;
+      }
+
+      .left-panels.is-mobile-active .mobile-info-btn:hover {
+        background: #ffffff;
+        box-shadow:
+          0 0 0 1px rgba(224, 71, 60, 0.9),
+          0 0 12px rgba(224, 71, 60, 0.68),
+          0 0 8px rgba(255, 255, 255, 0.46);
+      }
+
+      .left-panels.is-mobile-active .mobile-upload-btn {
+        position: absolute;
+        left: 50%;
+        bottom: 9px;
+        transform: translateX(-50%);
+        width: 54px;
+        height: 21px;
+        border: 0;
+        border-radius: 0;
+        background: transparent url('./assets/upload.png') center / contain no-repeat;
+        color: transparent;
+        font-size: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+      }
+
       .left-panels.is-mobile-active .mobile-panel + .mobile-panel {
-        margin-top: 11px;
+        margin-top: 10px;
         padding-top: 0;
         border-top: 0;
         position: relative;
+      }
+
+      .left-panels.is-mobile-active [data-mobile-panel="fusion"] {
+        background-image: none;
       }
 
       .left-panels.is-mobile-active .mobile-panel + .mobile-panel::before {
@@ -1902,16 +1988,21 @@
         display: flex;
         align-items: center;
         gap: 10px;
-        margin: 0 0 9px;
-        color: #fff;
-        font: 800 15px/1.05 'Inter', system-ui, sans-serif;
+        margin: 0 0 9px 10px;
+        color: #ff3f35;
+        font: 900 13px/1.05 'Inter', system-ui, sans-serif;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        position: relative;
+        top: 10px;
       }
 
       .left-panels.is-mobile-active .mobile-panel + .mobile-panel::after {
         content: '';
+        display: block;
         position: absolute;
-        top: 7px;
-        left: 54px;
+        top: 17px;
+        left: 64px;
         right: 0;
         height: 2px;
         background: linear-gradient(90deg, var(--forge-mobile-line), rgba(224, 71, 60, 0.16) 82%, transparent);
@@ -1921,9 +2012,15 @@
         display: flex;
         align-items: center;
         gap: 0;
-        margin-bottom: 8px;
+        margin-bottom: 9px;
         padding-bottom: 0;
         border-bottom: 0;
+      }
+
+      .left-panels.is-mobile-active [data-mobile-panel="origin"] .panel-header {
+        grid-column: 1 / -1;
+        grid-row: 1;
+        padding-right: 34px;
       }
 
       .left-panels.is-mobile-active .step-number {
@@ -1931,16 +2028,23 @@
       }
 
       .left-panels.is-mobile-active .panel-title {
+        position: relative;
+        top: 10px;
         display: flex;
         align-items: center;
         gap: 10px;
         width: 100%;
-        color: #fff;
-        font: 800 15px/1.05 'Inter', system-ui, sans-serif;
+        margin-left: 10px;
+        color: #ff3f35;
+        font: 900 13px/1.05 'Inter', system-ui, sans-serif;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        text-shadow: 0 2px 5px rgba(0, 0, 0, 0.9);
       }
 
       .left-panels.is-mobile-active .panel-title::after {
         content: '';
+        display: block;
         height: 2px;
         flex: 1 1 auto;
         background: linear-gradient(90deg, var(--forge-mobile-line), rgba(224, 71, 60, 0.16) 82%, transparent);
@@ -1957,50 +2061,189 @@
       }
 
       .left-panels.is-mobile-active [data-mobile-panel="origin"] .panel-description {
-        margin: 7px 0 7px;
+        grid-column: 1;
+        grid-row: 2 / span 2;
+        align-self: stretch;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        margin: 0;
+        padding: 3px 0 3px 10px;
+        color: #fff;
+        font: 800 0/1.18 'Inter', system-ui, sans-serif;
+        text-shadow: 0 2px 5px rgba(0, 0, 0, 0.85);
+      }
+
+      .left-panels.is-mobile-active [data-mobile-panel="origin"] .panel-description::before {
+        content: 'Upload an image';
+        font-size: 10px;
+        white-space: nowrap;
+      }
+
+      .left-panels.is-mobile-active [data-mobile-panel="origin"] .panel-description::after {
+        content: 'Max. 5MB';
         font-size: 10px;
       }
 
       .left-panels.is-mobile-active .upload-zone {
+        grid-column: 2;
+        grid-row: 2 / span 2;
         min-height: 0;
-        height: 86px;
+        height: 78px;
         padding: 0;
-        background: rgba(224, 71, 60, 0.18);
+        border: 0;
+        border-radius: 2px;
+        background:
+          url('./assets/tallwidepanel.png') center / 100% 100% no-repeat,
+          linear-gradient(180deg, rgba(31, 31, 32, 0.74), rgba(8, 8, 9, 0.94));
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.08),
+          inset 0 0 20px rgba(0, 0, 0, 0.48);
+      }
+
+      .left-panels.is-mobile-active .upload-zone::before,
+      .left-panels.is-mobile-active .fusion-item::before {
+        content: none;
+        display: none;
+        position: absolute;
+        inset: 5px;
+        border: 0;
+        pointer-events: none;
+      }
+
+      .left-panels.is-mobile-active .upload-zone::after,
+      .left-panels.is-mobile-active .fusion-item::after {
+        content: none;
+        display: none;
+        position: absolute;
+        left: 8px;
+        right: 8px;
+        top: 7px;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(255, 130, 112, 0.22), transparent);
+        pointer-events: none;
       }
 
       .left-panels.is-mobile-active .upload-icon {
-        width: 36px;
-        height: 36px;
+        display: none;
+      }
+
+      .left-panels.is-mobile-active .upload-zone > div:not(.origin-preview):not(.origin-clear) {
+        display: none;
+      }
+
+      .left-panels.is-mobile-active .upload-zone .mobile-upload-btn {
+        display: inline-flex;
+        z-index: 2;
+      }
+
+      .left-panels.is-mobile-active .upload-zone:not(.has-origin) .mobile-upload-btn {
+        width: 48px;
+        height: 48px;
+      }
+
+      .left-panels.is-mobile-active .origin-preview {
+        object-fit: cover;
       }
 
       .left-panels.is-mobile-active .fusion-grid {
         grid-template-columns: repeat(3, 1fr);
-        gap: 6px;
-        margin-bottom: 6px;
+        gap: 5px;
+        margin: 0;
       }
 
       .left-panels.is-mobile-active .fusion-item {
         aspect-ratio: auto;
-        height: 44px;
-        min-height: 44px;
-        padding: 5px 3px;
+        height: 100px;
+        min-height: 100px;
+        border-radius: 2px;
+        padding: 9px 4px 7px;
+        border: 0;
+        background:
+          url('./assets/tallwidepanel.png') center / 100% 100% no-repeat,
+          linear-gradient(180deg, rgba(31, 31, 32, 0.68), rgba(8, 8, 9, 0.94));
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.075),
+          inset 0 0 18px rgba(0, 0, 0, 0.44);
+      }
+
+      .left-panels.is-mobile-active .fusion-item.is-locked {
+        pointer-events: none;
+        cursor: default;
+        opacity: 1;
+        border-style: none;
+        border-color: transparent;
+        background:
+          linear-gradient(135deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 9px),
+          url('./assets/tallwidepanel.png') center / 100% 100% no-repeat,
+          linear-gradient(180deg, rgba(24, 24, 25, 0.58), rgba(5, 5, 6, 0.9));
+      }
+
+      .left-panels.is-mobile-active .fusion-item.is-locked .mobile-upload-btn {
+        display: none;
       }
 
       .left-panels.is-mobile-active .fusion-label {
-        font-size: 7px;
+        position: relative;
+        z-index: 2;
+        font-size: 8px;
+        color: rgba(255, 238, 229, 0.78);
+        letter-spacing: 0.4px;
       }
 
       .left-panels.is-mobile-active .fusion-hint {
+        position: relative;
+        z-index: 2;
         font-size: 6px;
+        color: rgba(255, 238, 229, 0.34);
       }
 
       .left-panels.is-mobile-active .fusion-status {
-        margin-top: 5px;
-        font-size: 9px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        min-height: 34px;
+        margin: 46px 3px 0;
+        padding: 8px 12px;
+        border: 0;
+        border-radius: 2px;
+        background: url('./assets/widepanel.png') center / 100% 100% no-repeat;
+        color: rgba(255, 238, 229, 0.88);
+        font: 800 11px/1.35 'Courier New', Consolas, monospace;
+        letter-spacing: 0;
+        text-align: right;
+        text-shadow: 0 0 7px rgba(224, 71, 60, 0.26);
+        box-shadow: none;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+
+      .left-panels.is-mobile-active .fusion-status::before {
+        content: 'FUSION STATUS';
+        color: #ff3f35;
+        font: 800 7px/1 'Inter', system-ui, sans-serif;
+        letter-spacing: 1px;
+        text-shadow: none;
+      }
+
+      .left-panels.is-mobile-active .fusion-status::after {
+        content: '|';
+        display: inline-block;
+        margin-left: 4px;
+        color: rgba(255, 238, 229, 0.95);
+        animation: terminal-caret 1s steps(1, end) infinite;
+      }
+
+      @keyframes terminal-caret {
+        0%, 49% { opacity: 1; }
+        50%, 100% { opacity: 0; }
       }
 
       .left-panels.is-mobile-active .fusion-progress {
-        margin-top: 5px;
+        display: none;
       }
 
       .left-panels.is-mobile-active .panel-actions {
@@ -2010,10 +2253,11 @@
       .right-panel-stack.is-mobile-active {
         position: relative;
         padding: 14px 16px 82px;
+        background: linear-gradient(180deg, rgba(18, 7, 6, 0.14), transparent 52px);
       }
 
       .right-panel-stack.is-mobile-active .panel.right-panel {
-        padding: 0;
+        padding: 16px 0 0;
         overflow: hidden;
       }
 
@@ -2026,17 +2270,20 @@
       }
 
       .right-panel-stack.is-mobile-active .input-group {
-        margin-bottom: 6px;
+        margin-bottom: 8px;
       }
 
       .right-panel-stack.is-mobile-active .input-label {
-        margin-bottom: 2px;
-        font-size: 7px;
+        margin-bottom: 5px;
+        color: #ff3f35;
+        font: 900 10px/1 'Inter', system-ui, sans-serif;
+        letter-spacing: 0.8px;
+        text-shadow: 0 2px 5px rgba(0, 0, 0, 0.9);
       }
 
       .right-panel-stack.is-mobile-active .input-select,
       .right-panel-stack.is-mobile-active .input-field {
-        padding: 6px 8px;
+        padding: 7px 8px;
         font-size: 10px;
       }
 
@@ -2357,9 +2604,11 @@
                 <div class="step-number">1</div>
                 <div class="panel-title">Origin</div>
               </div>
+              <button type="button" class="mobile-info-btn" data-info="origin" aria-label="About Origin" title="About Origin">i</button>
               <p class="panel-description">Upload an Image for analysis</p>
               <div class="upload-zone">
                 <div class="upload-icon">+</div>
+                <button type="button" class="mobile-upload-btn" aria-hidden="true" tabindex="-1">Upload</button>
                 <input type="file" id="originUpload" style="display: none;" accept="image/*">
               </div>
             </div>
@@ -2371,24 +2620,27 @@
               <div class="panel-title">Fusion</div>
             </div>
             <button type="button" class="fusion-clear" id="fusionClear" aria-label="Clear fusion">×</button>
+            <button type="button" class="mobile-info-btn" data-info="fusion" aria-label="About Fusion" title="About Fusion">i</button>
             <p class="panel-description">Or fuse them together.</p>
               
               <div class="fusion-grid" id="fusionGrid">
                 <div class="fusion-item" data-role="subject" id="fusionSubject" role="button" tabindex="0">
                   <div class="fusion-label">Subject</div>
                   <div class="fusion-hint">Drop or click</div>
+                  <button type="button" class="mobile-upload-btn" aria-hidden="true" tabindex="-1">Upload</button>
                   <input type="file" id="fusionSubjectInput" accept="image/*">
                   <span class="fusion-check"></span>
                 </div>
                 <div class="fusion-item" data-role="scene" id="fusionScene" role="button" tabindex="0">
                   <div class="fusion-label">Scene</div>
                   <div class="fusion-hint">Drop or click</div>
+                  <button type="button" class="mobile-upload-btn" aria-hidden="true" tabindex="-1">Upload</button>
                   <input type="file" id="fusionSceneInput" accept="image/*">
                   <span class="fusion-check"></span>
                 </div>
-                <div class="fusion-item is-locked" data-role="style" id="fusionStyle" role="button" tabindex="0" aria-disabled="true">
-                  <div class="fusion-label">Style</div>
-                  <div class="fusion-hint">Optional</div>
+                <div class="fusion-item is-locked" data-role="style" id="fusionStyle" aria-disabled="true">
+                  <div class="fusion-label">Preview</div>
+                  <div class="fusion-hint">Generated</div>
                   <input type="file" id="fusionStyleInput" accept="image/*">
                   <span class="fusion-check"></span>
                 </div>
@@ -2681,6 +2933,18 @@
       mobileTabs.forEach((tab) => {
         tab.addEventListener('click', () => setMobileForgeTab(tab.dataset.mobileTab));
       });
+
+      document.querySelectorAll('.mobile-info-btn').forEach((button) => {
+        button.addEventListener('click', (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          const message = button.dataset.info === 'origin'
+            ? 'Origin uses one image as the source. Forge captions it for prompt accuracy, then renders from that caption.'
+            : 'Fusion combines a subject image with a scene image. Forge analyzes subject, scene, and merged preview before rendering.';
+          window.alert(message);
+        });
+      });
+
       let recentCache = [];
 
       let originImage = null;
@@ -2906,6 +3170,7 @@
           uploadZone.classList.remove('has-origin');
           uploadZone.innerHTML = `
             <div class="upload-icon">+</div>
+            <button type="button" class="mobile-upload-btn" aria-hidden="true" tabindex="-1">Upload</button>
             <div style="font-size: 9px; color: #9aa3ad; margin-top: 4px;">Drop image</div>
           `;
         } else {

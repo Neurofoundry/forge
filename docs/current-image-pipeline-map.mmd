@@ -1,0 +1,48 @@
+flowchart TD
+  Start([Forge loaded]) --> Path{Input path}
+
+  Path -->|Origin| O1[Upload Origin image]
+  O1 --> O2[Preview shown]
+  O2 --> O3[Fusion disabled]
+  O3 --> O4["POST nfcr-synthesize<br/>/features/4/caption"]
+  O4 --> O5[originCaption]
+  O5 --> O6[Positive Prompt filled]
+  O6 --> Ready[Forge allowed when prompt checks pass]
+
+  Path -->|Fusion| F1[Upload Subject]
+  Path -->|Fusion| F2[Upload Scene]
+
+  F1 --> F3["POST extract.theneurofoundry.com<br/>subject extraction"]
+  F3 --> F4[extractedSubject image]
+  F4 --> F5["POST prmptrndr<br/>/fusion/cdp"]
+  F5 --> F6[cdpContext subject caption]
+
+  F2 --> F7["POST prmptrndr<br/>/fusion/acp"]
+  F7 --> F8[acpContext scene caption]
+
+  F4 --> F9[Canvas merge subject over scene]
+  F8 --> F9
+  F9 --> F10[mergedImage preview]
+  F10 --> F11["POST prmptrndr<br/>/fusion/sip"]
+  F11 --> F12[sipContext style caption]
+  F12 --> F13[Scene Prompt filled]
+  F12 --> F14[Style dropdown auto-selected]
+
+  F6 --> F15["POST synth.csirico9.workers.dev"]
+  F8 --> F15
+  F12 --> F15
+  F15 --> F16[synthCaption]
+  F16 --> F17[Positive Prompt filled]
+  F17 --> Ready
+
+  Ready --> P1[buildPrompt]
+  P1 --> P2["basePrompt + Style + Positive Prompt + Scene Prompt"]
+  P2 --> R1["POST nfcr-synthesize<br/>/features/4/render<br/>method: prompt"]
+  R1 --> R2[Render API forwards prompt]
+  R2 --> R3[Cloudflare SDXL worker]
+  R3 --> R4[PNG returned as image_base64 JSON]
+  R4 --> R5[Forge displays output]
+
+  R5 --> S1[Local recent cache updated]
+  R5 -.-> S2["POST api.theneurofoundry.com<br/>/api/forge/renders"]
+  S2 -. currently failing until auth/storage is finished .-> S3[Cloud recent storage]
