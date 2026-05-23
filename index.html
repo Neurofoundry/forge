@@ -1380,12 +1380,29 @@
     }
     
     .recent-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
       font-size: 9px;
       font-weight: 700;
       color: #c9d0d8;
       text-transform: uppercase;
       letter-spacing: 0.5px;
       margin-bottom: 8px;
+    }
+
+    .recent-download {
+      border: 1px solid rgba(222, 184, 135, 0.45);
+      background: rgba(18, 16, 14, 0.75);
+      color: #deb887;
+      border-radius: 6px;
+      padding: 5px 8px;
+      font-size: 9px;
+      line-height: 1;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      cursor: pointer;
     }
     
     .craft-items {
@@ -2803,7 +2820,10 @@
       <!-- Bottom controls -->
       <div class="bottom-controls">
         <div class="recent-crafts">
-          <div class="recent-title">Recent Crafts</div>
+          <div class="recent-title">
+            <span>Recent Crafts</span>
+            <button type="button" class="recent-download" id="downloadRecentCrafts">Download 10</button>
+          </div>
           <div class="craft-items">
             <div class="craft-item"></div>
             <div class="craft-item"></div>
@@ -2951,6 +2971,7 @@
       const mediaContent = document.getElementById('mediaContent');
       const statusEl = document.getElementById('forgeStatus');
       const recentContainer = document.querySelector('.craft-items');
+      const downloadRecentCrafts = document.getElementById('downloadRecentCrafts');
       const styleSelect = document.getElementById('styleSelect');
       const styleCheck = document.getElementById('styleCheck');
       const positivePrompt = document.getElementById('positivePrompt');
@@ -2985,6 +3006,10 @@
       const RECENT_THUMB_HEIGHT = 144;
       const RECENT_THUMB_QUALITY = 0.72;
       const RECENT_STORE_KEY = 'forgeRecentRendersV2';
+      const RECENT_DB_NAME = 'forgeRecentCrafts';
+      const RECENT_DB_VERSION = 1;
+      const RECENT_IMAGE_STORE = 'renders';
+      const LOCAL_RENDER_PREFIX = 'forge-local:';
       const AUTO_DOWNLOAD = false;
       const EXTRACT_TIMEOUT_MS = 45000;
       const FORGE_HOLO_ANIM_MS = 1400;
@@ -4020,16 +4045,25 @@ ${sip}`;
         return !!getForgeAuthToken() || !!document.querySelector('.nf-profile-link');
       }
 
+      function absoluteApiUrl(url) {
+        if (typeof url !== 'string' || !url) return '';
+        if (url.startsWith('/api/')) {
+          return `${NF_API_BASE.replace(/\/api$/, '')}${url}`;
+        }
+        return url;
+      }
+
       function normalizeRecentRender(render) {
         if (!render) return null;
         if (typeof render === 'string') {
+          const url = absoluteApiUrl(render);
           return {
-            url: render,
-            thumbUrl: render
+            url,
+            thumbUrl: url
           };
         }
-        const url = render.url || render.imageUrl || render.src || render.thumbUrl || '';
-        const thumbUrl = render.thumbUrl || render.thumbnailUrl || url;
+        const url = absoluteApiUrl(render.url || render.imageUrl || render.src || render.thumbUrl || '');
+        const thumbUrl = absoluteApiUrl(render.thumbUrl || render.thumbnailUrl || url);
         return url && thumbUrl
           ? {
               ...render,
@@ -4037,6 +4071,128 @@ ${sip}`;
               thumbUrl
             }
           : null;
+      }
+
+      function isLocalRenderUrl(url) {
+        return typeof url === 'string' && url.startsWith(LOCAL_RENDER_PREFIX);
+      }
+
+      function getLocalRenderId(url) {
+        return isLocalRenderUrl(url) ? url.slice(LOCAL_RENDER_PREFIX.length) : '';
+      }
+
+      function makeLocalRenderId() {
+        if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+          return window.crypto.randomUUID();
+        }
+        return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      }
+
+      function openRecentDb() {
+        return new Promise((resolve, reject) => {
+          if (!window.indexedDB) {
+            reject(new Error('IndexedDB unavailable'));
+            return;
+          }
+          const request = indexedDB.open(RECENT_DB_NAME, RECENT_DB_VERSION);
+          request.onupgradeneeded = () => {
+            const db = request.result;
+            if (!db.objectStoreNames.contains(RECENT_IMAGE_STORE)) {
+              db.createObjectStore(RECENT_IMAGE_STORE, { keyPath: 'id' });
+            }
+          };
+          request.onsuccess = () => resolve(request.result);
+          request.onerror = () => reject(request.error || new Error('Recent DB open failed'));
+        });
+      }
+
+      async function withRecentStore(mode, callback) {
+        const db = await openRecentDb();
+        try {
+          return await new Promise((resolve, reject) => {
+            const tx = db.transaction(RECENT_IMAGE_STORE, mode);
+            const store = tx.objectStore(RECENT_IMAGE_STORE);
+            const result = callback(store);
+            tx.oncomplete = () => resolve(result);
+            tx.onerror = () => reject(tx.error || new Error('Recent DB transaction failed'));
+          });
+        } finally {
+          db.close();
+        }
+      }
+
+      function requestToPromise(request) {
+        return new Promise((resolve, reject) => {
+          request.onsuccess = () => resolve(request.result);
+          request.onerror = () => reject(request.error || new Error('Recent DB request failed'));
+        });
+      }
+
+      async function putRecentImage(id, dataUrl) {
+        await withRecentStore('readwrite', (store) => {
+          store.put({ id, dataUrl, savedAt: Date.now() });
+        });
+      }
+
+      async function getRecentImage(id) {
+        return withRecentStore('readonly', async (store) => {
+          const record = await requestToPromise(store.get(id));
+          return record && record.dataUrl ? record.dataUrl : '';
+        });
+      }
+
+      async function pruneRecentImages(keepIds) {
+        try {
+          const db = await openRecentDb();
+          await new Promise((resolve, reject) => {
+            const tx = db.transaction(RECENT_IMAGE_STORE, 'readwrite');
+            const store = tx.objectStore(RECENT_IMAGE_STORE);
+            const request = store.getAllKeys();
+            request.onsuccess = () => {
+              request.result.forEach((key) => {
+                if (!keepIds.has(key)) store.delete(key);
+              });
+            };
+            request.onerror = () => reject(request.error || new Error('Recent DB key scan failed'));
+            tx.oncomplete = () => resolve();
+            tx.onerror = () => reject(tx.error || new Error('Recent DB prune failed'));
+            tx.onabort = () => reject(tx.error || new Error('Recent DB prune aborted'));
+          });
+          db.close();
+        } catch (err) {
+          console.warn('Recent DB prune failed', err);
+        }
+      }
+
+      async function resolveRecentImageUrl(url) {
+        if (!isLocalRenderUrl(url)) return url;
+        try {
+          return await getRecentImage(getLocalRenderId(url));
+        } catch (err) {
+          console.warn('Recent image load failed', err);
+          return '';
+        }
+      }
+
+      async function persistRecentRenders(renders) {
+        const localIds = new Set();
+        const compactRenders = [];
+        for (const render of renders.map(normalizeRecentRender).filter(Boolean).slice(0, MAX_RECENT)) {
+          const next = { ...render };
+          if (typeof next.url === 'string' && next.url.startsWith('data:image')) {
+            const id = next.localId || next.id || makeLocalRenderId();
+            await putRecentImage(id, next.url);
+            next.id = id;
+            next.localId = id;
+            next.url = `${LOCAL_RENDER_PREFIX}${id}`;
+          }
+          const id = getLocalRenderId(next.url);
+          if (id) localIds.add(id);
+          compactRenders.push(next);
+        }
+        localStorage.setItem(RECENT_STORE_KEY, JSON.stringify(compactRenders));
+        localStorage.setItem(RECENT_KEY, JSON.stringify(compactRenders.map((render) => render.thumbUrl)));
+        await pruneRecentImages(localIds);
       }
 
       function getRecentRenders() {
@@ -4072,6 +4228,11 @@ ${sip}`;
             : [];
           if (!renders.length) return false;
           recentCache = renders.slice(0, MAX_RECENT);
+          try {
+            await persistRecentRenders(recentCache);
+          } catch (err) {
+            console.warn('Cloud recent cache update failed', err);
+          }
           renderRecent(recentCache);
           return true;
         } catch (err) {
@@ -4115,55 +4276,52 @@ ${sip}`;
           url: dataUrl,
           thumbUrl
         };
-        if (!hasForgeAuthSignal()) {
-          recentCache.unshift(recentRender);
-          recentCache = recentCache.slice(0, MAX_RECENT);
+
+        if (hasForgeAuthSignal()) {
+          const token = getForgeAuthToken();
+          const headers = {
+            'Content-Type': 'application/json'
+          };
+          if (token) {
+            headers.Authorization = `Bearer ${token}`;
+          }
           try {
-            const localRenders = recentCache
-              .map(normalizeRecentRender)
-              .filter(Boolean)
-              .slice(0, MAX_RECENT);
-            localStorage.setItem(RECENT_STORE_KEY, JSON.stringify(localRenders));
-            localStorage.setItem(RECENT_KEY, JSON.stringify(localRenders.map((render) => render.thumbUrl)));
+            const response = await fetch(`${NF_API_BASE}/forge/renders`, {
+              method: 'POST',
+              headers,
+              credentials: 'include',
+              body: JSON.stringify({
+                imageDataUrl: dataUrl,
+                thumbDataUrl: thumbUrl
+              })
+            });
+            if (response.ok) {
+              const data = await response.json();
+              const cloudRenders = (data.data && Array.isArray(data.data.renders))
+                ? data.data.renders.map(normalizeRecentRender).filter(Boolean)
+                : [];
+              recentRender = normalizeRecentRender(data.data && data.data.render) || recentRender;
+              recentCache = cloudRenders.length
+                ? cloudRenders.slice(0, MAX_RECENT)
+                : [recentRender, ...recentCache].slice(0, MAX_RECENT);
+              try {
+                await persistRecentRenders(recentCache);
+              } catch (err) {
+                console.error('Recent save failed', err);
+              }
+              renderRecent(recentCache);
+              return;
+            }
+            console.warn('Cloud render save failed:', response.status);
           } catch (err) {
-            console.error('Recent save failed', err);
+            console.warn('Cloud render save failed', err);
           }
-          renderRecent(recentCache);
-          return;
         }
-        const token = getForgeAuthToken();
-        const headers = {
-          'Content-Type': 'application/json'
-        };
-        if (token) {
-          headers.Authorization = `Bearer ${token}`;
-        }
-        try {
-          const response = await fetch(`${NF_API_BASE}/forge/renders`, {
-            method: 'POST',
-            headers,
-            credentials: 'include',
-            body: JSON.stringify({
-              imageDataUrl: dataUrl,
-              thumbDataUrl: thumbUrl
-            })
-          });
-          if (response.ok) {
-            const data = await response.json();
-            recentRender = normalizeRecentRender(data.data && data.data.render) || recentRender;
-          }
-        } catch (err) {
-          console.warn('Cloud render save failed', err);
-        }
+
         recentCache.unshift(recentRender);
         recentCache = recentCache.slice(0, MAX_RECENT);
         try {
-          const localRenders = recentCache
-            .map(normalizeRecentRender)
-            .filter(Boolean)
-            .slice(0, MAX_RECENT);
-          localStorage.setItem(RECENT_STORE_KEY, JSON.stringify(localRenders));
-          localStorage.setItem(RECENT_KEY, JSON.stringify(localRenders.map((render) => render.thumbUrl)));
+          await persistRecentRenders(recentCache);
         } catch (err) {
           console.error('Recent save failed', err);
         }
@@ -4177,6 +4335,52 @@ ${sip}`;
         document.body.appendChild(link);
         link.click();
         link.remove();
+      }
+
+      async function downloadRecentRender(render, index) {
+        const normalized = normalizeRecentRender(render);
+        if (!normalized) return false;
+        const src = await resolveRecentImageUrl(normalized.url);
+        if (!src) return false;
+        const filename = `forge_recent_${String(index + 1).padStart(2, '0')}.png`;
+        if (src.startsWith('data:image')) {
+          downloadImage(src, filename);
+          return true;
+        }
+        const response = await fetch(src, { credentials: 'include' });
+        if (!response.ok) throw new Error(`Recent download failed: ${response.status}`);
+        const blob = await response.blob();
+        const objectUrl = URL.createObjectURL(blob);
+        try {
+          downloadImage(objectUrl, filename);
+        } finally {
+          window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+        }
+        return true;
+      }
+
+      async function downloadAllRecentRenders() {
+        const renders = (recentCache && recentCache.length ? recentCache : getRecentRenders())
+          .map(normalizeRecentRender)
+          .filter(Boolean)
+          .slice(0, MAX_RECENT);
+        if (!renders.length) {
+          setStatus('No recent crafts to download.', 'error');
+          return;
+        }
+        if (downloadRecentCrafts) downloadRecentCrafts.disabled = true;
+        let count = 0;
+        try {
+          for (let i = 0; i < renders.length; i++) {
+            if (await downloadRecentRender(renders[i], i)) count++;
+          }
+          setStatus(`Downloaded ${count} recent craft${count === 1 ? '' : 's'}.`, 'success');
+        } catch (err) {
+          console.error(err);
+          setStatus('Recent craft download failed.', 'error');
+        } finally {
+          if (downloadRecentCrafts) downloadRecentCrafts.disabled = false;
+        }
       }
 
       function renderRecent(rendersOverride) {
@@ -4196,13 +4400,18 @@ ${sip}`;
       }
 
       if (recentContainer) {
-        recentContainer.addEventListener('click', (e) => {
+        recentContainer.addEventListener('click', async (e) => {
           const target = e.target.closest('.craft-item');
           if (!target) return;
           const src = target.dataset.src;
           if (!src) return;
-          displayImage(src, false);
+          const resolvedSrc = await resolveRecentImageUrl(src);
+          if (resolvedSrc) displayImage(resolvedSrc, false);
         });
+      }
+
+      if (downloadRecentCrafts) {
+        downloadRecentCrafts.addEventListener('click', downloadAllRecentRenders);
       }
 
       async function renderImages(promptText, negativeText) {
