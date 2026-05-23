@@ -1407,7 +1407,7 @@
     
     .craft-items {
       display: grid;
-      grid-template-columns: repeat(16, 1fr);
+      grid-template-columns: repeat(10, 1fr);
       gap: 8px;
       scrollbar-width: none;
       -ms-overflow-style: none;
@@ -2835,12 +2835,6 @@
             <div class="craft-item"></div>
             <div class="craft-item"></div>
             <div class="craft-item"></div>
-            <div class="craft-item"></div>
-            <div class="craft-item"></div>
-            <div class="craft-item"></div>
-            <div class="craft-item"></div>
-            <div class="craft-item"></div>
-            <div class="craft-item"></div>
           </div>
         </div>
       </div>
@@ -4228,17 +4222,25 @@ ${sip}`;
             : [];
           if (!renders.length) return false;
           recentCache = renders.slice(0, MAX_RECENT);
+          renderRecent(recentCache);
           try {
             await persistRecentRenders(recentCache);
           } catch (err) {
             console.warn('Cloud recent cache update failed', err);
           }
-          renderRecent(recentCache);
           return true;
         } catch (err) {
           console.warn('Cloud recent load failed', err);
           return false;
         }
+      }
+
+      async function initializeRecentRenders() {
+        if (hasForgeAuthSignal() && await loadCloudRecentRenders()) {
+          return;
+        }
+        recentCache = getRecentRenders();
+        renderRecent(recentCache);
       }
 
       function makeRecentThumb(dataUrl) {
@@ -4568,9 +4570,7 @@ ${sip}`;
       }
 
       window.addEventListener('load', async () => {
-        recentCache = getRecentRenders();
-        renderRecent(recentCache);
-        window.setTimeout(loadCloudRecentRenders, 1200);
+        window.setTimeout(initializeRecentRenders, 1200);
         updateUploadZoneLabel('');
         updateRenderState();
         try {
