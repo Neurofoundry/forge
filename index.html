@@ -1434,6 +1434,14 @@
       color: #7b8088;
       font-size: 10px;
       transform: translateZ(0);
+      overflow: hidden;
+    }
+
+    .craft-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
     }
     
     .craft-item:hover {
@@ -4277,6 +4285,9 @@ ${sip}`;
           url: dataUrl,
           thumbUrl
         };
+        recentCache.unshift(recentRender);
+        recentCache = recentCache.slice(0, MAX_RECENT);
+        renderRecent(recentCache);
 
         if (hasForgeAuthSignal()) {
           const token = getForgeAuthToken();
@@ -4304,7 +4315,7 @@ ${sip}`;
               recentRender = normalizeRecentRender(data.data && data.data.render) || recentRender;
               recentCache = cloudRenders.length
                 ? cloudRenders.slice(0, MAX_RECENT)
-                : [recentRender, ...recentCache].slice(0, MAX_RECENT);
+                : [recentRender, ...recentCache.slice(1)].slice(0, MAX_RECENT);
               try {
                 await persistRecentRenders(recentCache);
               } catch (err) {
@@ -4319,8 +4330,6 @@ ${sip}`;
           }
         }
 
-        recentCache.unshift(recentRender);
-        recentCache = recentCache.slice(0, MAX_RECENT);
         try {
           await persistRecentRenders(recentCache);
         } catch (err) {
@@ -4391,10 +4400,17 @@ ${sip}`;
         items.forEach((item, idx) => {
           const render = normalizeRecentRender(renders[idx]);
           if (render) {
-            item.style.backgroundImage = `url(${render.thumbUrl})`;
+            item.style.backgroundImage = '';
+            item.innerHTML = '';
+            const img = document.createElement('img');
+            img.alt = 'Recent craft';
+            img.loading = 'lazy';
+            img.src = render.thumbUrl;
+            item.appendChild(img);
             item.dataset.src = render.url;
           } else {
             item.style.backgroundImage = '';
+            item.innerHTML = '';
             item.dataset.src = '';
           }
         });
