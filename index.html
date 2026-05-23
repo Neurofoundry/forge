@@ -4204,7 +4204,6 @@ ${sip}`;
       }
 
       async function loadCloudRecentRenders() {
-        if (!hasForgeAuthSignal()) return false;
         const token = getForgeAuthToken();
         const headers = token
           ? { 'Authorization': `Bearer ${token}` }
@@ -4236,7 +4235,7 @@ ${sip}`;
       }
 
       async function initializeRecentRenders() {
-        if (hasForgeAuthSignal() && await loadCloudRecentRenders()) {
+        if (await loadCloudRecentRenders()) {
           return;
         }
         recentCache = getRecentRenders();
@@ -4571,6 +4570,8 @@ ${sip}`;
 
       window.addEventListener('load', async () => {
         window.setTimeout(initializeRecentRenders, 1200);
+        window.setTimeout(loadCloudRecentRenders, 3000);
+        window.setTimeout(loadCloudRecentRenders, 6000);
         updateUploadZoneLabel('');
         updateRenderState();
         try {
